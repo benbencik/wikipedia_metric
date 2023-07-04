@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            WikimediaParser.ParseFrom("Ahoj");
+            WikimediaParser.ParseFrom("data/wikisource_dummy.txt");
         }
     }
 }

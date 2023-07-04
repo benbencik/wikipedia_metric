@@ -1,0 +1,25 @@
+<page>
+    <title>AfghanistanTransnationalIssues</title>
+    <ns>0</ns>
+    <id>21</id>
+    <redirect title="Foreign relations of Afghanistan" />
+    <revision>
+      <id>783821743</id>
+      <parentid>46448859</parentid>
+      <timestamp>2017-06-04T21:43:14Z</timestamp>
+      <contributor>
+        <username>Tom.Reding</username>
+        <id>9784415</id>
+      </contributor>
+      <minor />
+      <comment>+{{R category shell}} using [[Project:AWB|AWB]]</comment>
+      <model>wikitext</model>
+      <format>text/x-wiki</format>
+      <text bytes="101" xml:space="preserve">#REDIRECT [[Foreign relations of Afghanistan]]
+
+{{Redirect category shell|1=
+ {{R from CamelCase}}
+}}</text>
+      <sha1>80xx3tzgvcdioufir5addc3wn177se3</sha1>
+    </revision>
+</page>
