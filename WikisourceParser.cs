@@ -43,7 +43,7 @@ namespace WikipediaMetric
 
         public static TMap ParseFrom(string path)
         {
-            Console.WriteLine("Reading file: " + path);
+            _logger.Info("Reading file: " + path);
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             foreach (string currentLine in GetLines(path))
@@ -67,7 +67,7 @@ namespace WikipediaMetric
                 }
             }
             stopwatch.Stop();
-            _logger.Info(stopwatch.ElapsedMilliseconds);
+            _logger.Info($"Finished in {stopwatch.ElapsedMilliseconds}ms.");
 
             return _map;
         }
