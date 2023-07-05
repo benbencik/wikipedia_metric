@@ -1,4 +1,6 @@
-﻿namespace WikipediaMetric
+﻿global using TMap = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>;
+
+namespace WikipediaMetric
 {
     class Program
     {

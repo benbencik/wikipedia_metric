@@ -6,11 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using TMap = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>;
 
 namespace WikipediaMetric
 {
-    internal partial class WikimediaParser
+    static partial class WikimediaParser
     {
         private static Logger _logger;
 
@@ -24,7 +23,7 @@ namespace WikipediaMetric
         private static Regex _linksRegex;
 
         // Map page title with its links
-        private static TMap _map;
+        private static TMap _titleLinksMap;
 
         static WikimediaParser()
         {
@@ -38,7 +37,7 @@ namespace WikipediaMetric
             _textRegex = textRegex();
             _linksRegex = linksRegex();
 
-            _map = new();
+            _titleLinksMap = new();
         }
 
         public static TMap ParseFrom(string path)
@@ -69,7 +68,7 @@ namespace WikipediaMetric
             stopwatch.Stop();
             _logger.Info($"Finished in {stopwatch.ElapsedMilliseconds}ms.");
 
-            return _map;
+            return _titleLinksMap;
         }
 
         private static void ProcessPage()
@@ -87,7 +86,7 @@ namespace WikipediaMetric
 
                 // Map links from the page to the corresponding title
                 var linksList = from link in links select link.Groups[1].Value;
-                _map.Add(title, linksList);
+                _titleLinksMap.Add(title, linksList);
 
                 // Clear the buffer so we can read to again a new page
                 _pageBuffer.Clear();
