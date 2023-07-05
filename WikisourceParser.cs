@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -45,7 +42,7 @@ namespace WikipediaMetric
             _logger.Info("Reading file: " + path);
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            foreach (string currentLine in GetLines(path))
+            foreach (string currentLine in FileManager.GetLines(path))
             {
                 // Detect start and end of a page
                 // We are detecting only `page>` since wikisource dumps are
@@ -90,19 +87,6 @@ namespace WikipediaMetric
 
                 // Clear the buffer so we can read to again a new page
                 _pageBuffer.Clear();
-            }
-        }
-
-        private static IEnumerable GetLines(string path)
-        {
-            try
-            {
-                return File.ReadLines(path);
-            }
-            catch (Exception)
-            {
-                _logger.Error("An error occured during reading the wikimedia file.");
-                throw;
             }
         }
 
