@@ -12,7 +12,7 @@ namespace WikipediaMetric
         {
             _logger = new Logger(nameof(FileManager));
         }
-        // Saves TMap of page titles and corresponding links to a json file
+        // Opens StreamWriter for a given path
         public static StreamWriter GetStreamWriter(string filePath)
         {
             try
