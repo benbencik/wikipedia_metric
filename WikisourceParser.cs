@@ -27,6 +27,7 @@ namespace WikipediaMetric
         {
             Console.WriteLine("Reading file: " + path);
 
+            // TODO: Move to class level private variables
             var pageTag = "page>";
             var pageBuffer = new StringBuilder();
             var readingPage = false;
@@ -43,18 +44,22 @@ namespace WikipediaMetric
             {
                 if (line.Contains(pageTag))
                 {
+                    // TODO: Refactor this section to functions, eg. put regex initialisations into some __init__
+                    // as well as the map variable, than ParseFrom will read lines and in this section
+                    // just processPage will be called which will have access to all class variables
                     if (readingPage)
                     {
-                        // Process page
+                        // Process the page
                         var title = titleRegex.Matches(pageBuffer.ToString())[0].Groups[1].Value;
                         var text = textRegex.Matches(pageBuffer.ToString())[0].Groups[1].Value;
                         var links = linksRegex.Matches(text);
 
+                        // Map links from the page to the corresponding title
                         var linksList = from link in links select link.Groups[1].Value;
                         map.Add(title, linksList);
 
+                        // Clear the buffer so we can read to again a new page
                         pageBuffer.Clear();
-
                     }
                     readingPage = !readingPage;
                     continue;
