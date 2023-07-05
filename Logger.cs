@@ -9,24 +9,14 @@ namespace WikipediaMetric
         Error
     }
 
-    internal class Logger
+    class Logger
     {
-        private static string _instanceName;
-        private Logger(string instanceName)
-        {
-            _instanceName = instanceName;
-        }
-        private static Logger _instance;
-        public static Logger GetLogger(string instanceName)
-        {
-            _instance ??= new Logger(instanceName);
-            return _instance;
-        }
+        private readonly string _instanceName;
+        public Logger(string instanceName) => _instanceName = instanceName;
 
-        private static void Log(LogLevel level, object message)
+        private void Log(LogLevel level, object message)
         {
-            var stringMessage = message.ToString();
-            string logEntry = $"{DateTime.Now} - [{level}] - {stringMessage}";
+            string logEntry = $"{DateTime.Now} - [{level}] - {message}";
 
             switch (level)
             {
@@ -44,19 +34,10 @@ namespace WikipediaMetric
             Console.ResetColor(); // Reset console color
         }
 
-        public void Info(object message)
-        {
-            Log(LogLevel.Info, message);
-        }
+        public void Info(object message) => Log(LogLevel.Info, message);
 
-        public void Warning(object message)
-        {
-            Log(LogLevel.Warning, message);
-        }
+        public void Warning(object message) => Log(LogLevel.Warning, message);
 
-        public void Error(object message)
-        {
-            Log(LogLevel.Error, message);
-        }
+        public void Error(object message) => Log(LogLevel.Error, message);
     }
 }

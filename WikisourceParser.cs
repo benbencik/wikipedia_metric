@@ -28,7 +28,7 @@ namespace WikipediaMetric
 
         static WikimediaParser()
         {
-            _logger = Logger.GetLogger(nameof(WikimediaParser));
+            _logger = new Logger(nameof(WikimediaParser));
 
             _pageTag = "page>";
             _pageBuffer = new();
