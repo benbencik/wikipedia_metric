@@ -40,11 +40,9 @@
       <comment>+{{Redirect category shell}} using [[Project:AWB|AWB]]</comment>
       <model>wikitext</model>
       <format>text/x-wiki</format>
-      <text bytes="86" xml:space="preserve">#REDIRECT [[History of Albania]]
-
-{{Redirect category shell|1=
-{{R from CamelCase}}
-}}</text>
+      <text bytes="86" xml:space="preserve">=== Pre-modern era ===
+[[File:Paolo Monti - Servizio fotografico (Napoli, 1969) - BEIC 6353768.jpg|thumb|upright=.7|[[Zeno of Citium]] (c. 334 – c. 262 BC), whose ''[[Republic (Zeno)|Republic]]'' inspired [[Peter Kropotkin]]{{sfn|Marshall|1993|p=70}}]]
+Before the creation of towns and cities, established authority did not exist. It was after the institution of authority that anarchistic ideas were espoused as a reaction.{{sfn|Graham|2005|pp=xi–xiv}} The most notable precursors to anarchism in the ancient world were in China and Greece. In China, [[philosophical anarchism]] (the discussion on the legitimacy of the state) was delineated by [[Taoism|Taoist]] philosophers [[Zhuang Zhou]] and [[Laozi]].{{sfnm|1a1=Coutinho|1y=2016|2a1=Marshall|2y=1993|2p=54}} Alongside [[Stoicism]], Taoism has been said to have had &quot;significant anticipations&quot; of anarchism.{{Sfn|Sylvan|2007|p=257}}</text>
       <sha1>rbhoo26ul5z7m8uw9msx5gwdy4cmg08</sha1>
     </revision>
   </page>

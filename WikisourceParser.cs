@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -29,9 +31,12 @@ namespace WikipediaMetric
             var pageBuffer = new StringBuilder();
             var readingPage = false;
 
-
             Regex titleRegex = TitleRegex();
             Regex textRegex = TextRegex();
+            Regex linksRegex = LinksRegex();
+
+            // Map page title with its links
+            var map = new Dictionary<string, IEnumerable<string>>();
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             foreach (string line in GetLines(path))
@@ -41,8 +46,13 @@ namespace WikipediaMetric
                     if (readingPage)
                     {
                         // Process page
-                        var title = titleRegex.Matches(pageBuffer.ToString())[0];
-                        var text = textRegex.Matches(pageBuffer.ToString())[0];
+                        var title = titleRegex.Matches(pageBuffer.ToString())[0].Groups[1].Value;
+                        var text = textRegex.Matches(pageBuffer.ToString())[0].Groups[1].Value;
+                        var links = linksRegex.Matches(text);
+
+                        var linksList = from link in links select link.Groups[1].Value;
+                        map.Add(title, linksList);
+
                         pageBuffer.Clear();
 
                     }
@@ -57,12 +67,13 @@ namespace WikipediaMetric
             }
             stopwatch.Stop();
             Console.WriteLine(stopwatch.ElapsedMilliseconds);
-
         }
 
-        [GeneratedRegex("<title.*>.*</title>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"<title[^>]*>([^<]*)<\/title>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex TitleRegex();
-        [GeneratedRegex("<text.*>.*</text>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"<text[^>]*>([^<]*)<\/text>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex TextRegex();
+        [GeneratedRegex(@"\[\[(?!File:)([^\[\]|]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        private static partial Regex LinksRegex();
     }
 }
