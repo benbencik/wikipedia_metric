@@ -1,5 +1,3 @@
-
-
 using System;
 
 namespace WikipediaMetric
@@ -11,11 +9,24 @@ namespace WikipediaMetric
         Error
     }
 
-    public static class Logger
+    internal class Logger
     {
-        public static void Log(LogLevel level, string message)
+        private static string _instanceName;
+        private Logger(string instanceName)
         {
-            string logEntry = $"{DateTime.Now} - [{level}] - {message}";
+            _instanceName = instanceName;
+        }
+        private static Logger _instance;
+        public static Logger GetLogger(string instanceName)
+        {
+            _instance ??= new Logger(instanceName);
+            return _instance;
+        }
+
+        private static void Log(LogLevel level, object message)
+        {
+            var stringMessage = message.ToString();
+            string logEntry = $"{DateTime.Now} - [{level}] - {stringMessage}";
 
             switch (level)
             {
@@ -29,21 +40,21 @@ namespace WikipediaMetric
                     Console.ForegroundColor = ConsoleColor.Red; // Set color for Error logs
                     break;
             }
-            Console.WriteLine(logEntry);  // Log to console
+            Console.WriteLine("(" + _instanceName + ")" + ": " + logEntry);  // Log to console
             Console.ResetColor(); // Reset console color
         }
 
-        public static void Info(string message)
+        public void Info(object message)
         {
             Log(LogLevel.Info, message);
         }
 
-        public static void Warning(string message)
+        public void Warning(object message)
         {
             Log(LogLevel.Warning, message);
         }
 
-        public static void Error(string message)
+        public void Error(object message)
         {
             Log(LogLevel.Error, message);
         }
