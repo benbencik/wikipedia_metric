@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -11,8 +10,10 @@ using TMap = System.Collections.Generic.Dictionary<string, System.Collections.Ge
 
 namespace WikipediaMetric
 {
-    partial class WikimediaParser
+    internal partial class WikimediaParser
     {
+        private static Logger _logger;
+
         private static string _pageTag;
         private static StringBuilder _pageBuffer;
         // true if reading contents of (inside of) a page (<page> contents </page>)
@@ -27,6 +28,8 @@ namespace WikipediaMetric
 
         static WikimediaParser()
         {
+            _logger = Logger.GetLogger(nameof(WikimediaParser));
+
             _pageTag = "page>";
             _pageBuffer = new();
             _readingPage = false;
@@ -64,7 +67,7 @@ namespace WikipediaMetric
                 }
             }
             stopwatch.Stop();
-            Console.WriteLine(stopwatch.ElapsedMilliseconds);
+            _logger.Info(stopwatch.ElapsedMilliseconds);
 
             return _map;
         }
@@ -99,7 +102,7 @@ namespace WikipediaMetric
             }
             catch (Exception)
             {
-                Console.WriteLine("An error occured during reading the wikimedia file.");
+                _logger.Error("An error occured during reading the wikimedia file.");
                 throw;
             }
         }
