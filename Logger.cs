@@ -11,9 +11,9 @@ namespace WikipediaMetric
         Error
     }
 
-    public class Logger
+    public static class Logger
     {
-        public void Log(LogLevel level, string message)
+        public static void Log(LogLevel level, string message)
         {
             string logEntry = $"{DateTime.Now} - [{level}] - {message}";
 
@@ -33,17 +33,17 @@ namespace WikipediaMetric
             Console.ResetColor(); // Reset console color
         }
 
-        public void LogInfo(string message)
+        public static void Info(string message)
         {
             Log(LogLevel.Info, message);
         }
 
-        public void LogWarning(string message)
+        public static void Warning(string message)
         {
             Log(LogLevel.Warning, message);
         }
 
-        public void LogError(string message)
+        public static void Error(string message)
         {
             Log(LogLevel.Error, message);
         }
