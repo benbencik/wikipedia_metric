@@ -1,6 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Text.Json;
 
 namespace WikipediaMetric
 {
@@ -48,7 +49,40 @@ namespace WikipediaMetric
 		{
 			_logger.Info("Loading TMap from the file: " + filePath);
 
-			return new TMap();
+			var linesEnumerator = FileManager.GetLines(filePath).GetEnumerator();
+
+			if (!linesEnumerator.MoveNext())
+			{
+				_logger.Error("Given json file is empty");
+				throw new JsonException();
+			}
+
+			var map = new TMap();
+
+			// We discarded the first line since it is the '[' opening char
+			while (linesEnumerator.MoveNext())
+			{
+				if (linesEnumerator.Current.ToString().Trim() == "{")
+				{
+					linesEnumerator.MoveNext();
+					var titleString = linesEnumerator.Current.ToString().Split(":")[1];
+					// Remove the parentheses
+					var title = titleString[2..^2];
+
+					linesEnumerator.MoveNext();
+					var linksArray = linesEnumerator.Current.ToString().Split(":")[1];
+					// Remove the ` ["` from the start and `"],` from the end
+					linksArray = linksArray[3..^2];
+
+					var links = new List<string>();
+					foreach (var link in linksArray.Split(","))
+						links.Add(link);
+
+					map.Add(title, links);
+				}
+			}
+
+			return map;
 		}
 
 		private static string FormatPair(KeyValuePair<string, List<string>> pair, bool trailingComma)

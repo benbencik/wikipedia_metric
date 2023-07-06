@@ -14,10 +14,13 @@ namespace WikipediaMetric
 
             try
             {
-                var map = WikimediaParser.ParseFrom("data/wikisource_dummy.txt");
-                JsonManager.ToFile(map, "data/enwiki-dummy.json");
+                // var map = WikimediaParser.ParseFrom("data/wikisource_dummy.txt");
+                // JsonManager.ToFile(map, "data/enwiki-dummy.json");
                 // var map = WikimediaParser.ParseFrom("data/enwiki-20230401-pages-articles-multistream1.xml-p1p41242");
                 // JsonManager.ToFile(map, "data/enwiki-20230401.json");
+
+                var map = JsonManager.FromFile("data/enwiki-dummy.json");
+                JsonManager.ToFile(map, "data/enwiki-dummy-test.json");
             }
             catch (Exception e)
             {
