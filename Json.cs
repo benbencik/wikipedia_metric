@@ -1,74 +1,94 @@
-using System;
 using System.Collections.Generic;
 using System.Text;
+
 
 namespace WikipediaMetric
 {
 
-    static class JsonManager
-    {
-        private static readonly Logger _logger;
+	static class JsonManager
+	{
+		private static readonly Logger _logger;
 
-        static JsonManager()
-        {
-            _logger = new Logger(nameof(JsonManager));
-        }
-        // Saves TMap of page titles and corresponding links to a json file
-        public static void ToFile(TMap titleLinksMap, string filePath)
-        {
-            _logger.Info("Saving TMap to the file: " + filePath);
+		static JsonManager()
+		{
+			_logger = new Logger(nameof(JsonManager));
+		}
+		// Saves TMap of page titles and corresponding links to a json file
+		public static void ToFile(TMap titleLinksMap, string filePath)
+		{
+			_logger.Info("Saving TMap to the file: " + filePath);
 
-            using var file = FileManager.GetStreamWriter(filePath);
+			using var file = FileManager.GetStreamWriter(filePath);
+			var titleLinksMapEnumerator = titleLinksMap.GetEnumerator();
 
-            file.WriteLine("[");
+			// If Tmap is empty write nothing to the file
+			if (!titleLinksMapEnumerator.MoveNext())
+			{
+				_logger.Warning("TMap is empty.");
+				return;
+			}
 
-            file.Write(FormatPairs(titleLinksMap));
+			// We do not want trailing comma at the end so we choose one pair
+			// and append it at the end without the comma, we do not care
+			// about the ordering here so we can choose the first one
+			// for our last one
+			var lastPair = titleLinksMapEnumerator.Current;
 
-            file.WriteLine("]");
-        }
+			file.WriteLine("[");
 
-        // Loads Tmap of page titles and corresponding links from a json file
-        public static TMap FromFile(string filePath)
-        {
-            _logger.Info("Loading TMap from the file: " + filePath);
+			while (titleLinksMapEnumerator.MoveNext())
+				file.Write(FormatPair(titleLinksMapEnumerator.Current, true));
+			file.Write(FormatPair(lastPair, false));
 
-            return new TMap();
-        }
+			file.WriteLine("]");
+		}
 
-        private static string FormatPairs(TMap titleLinksMap)
-        {
-            var formatted = new StringBuilder();
-            foreach (var pair in titleLinksMap)
-            {
-                formatted.AppendLine("	{");
+		// Loads Tmap of page titles and corresponding links from a json file
+		public static TMap FromFile(string filePath)
+		{
+			_logger.Info("Loading TMap from the file: " + filePath);
 
-                formatted.AppendLine($@"		""title"": ""{pair.Key}"",");
-                formatted.AppendLine($@"		""links"": [""{FormatLinks(pair.Value)}""]");
+			return new TMap();
+		}
 
-                formatted.AppendLine("	},");
-            }
+		private static string FormatPair(KeyValuePair<string, List<string>> pair, bool trailingComma)
+		{
+			var formatted = new StringBuilder();
 
-            // Remove trailing comma
-            formatted = formatted.Remove(formatted.Length - 3, 3);
-            formatted.Append(Environment.NewLine);
+			formatted.AppendLine("	{");
 
-            return formatted.ToString();
-        }
+			formatted.AppendLine($@"		""title"": ""{pair.Key}"",");
+			var formatedLinks = FormatLinks(pair.Value);
+			if (formatedLinks.Length > 0)
+				formatted.AppendLine($@"		""links"": [""{FormatLinks(pair.Value)}""]");
+			else
+				formatted.AppendLine($@"		""links"": []");
 
-        private static string FormatLinks(IEnumerable<string> links)
-        {
-            var formatted = new StringBuilder();
+			if (trailingComma)
+				formatted.AppendLine("	},");
+			else
+				formatted.AppendLine("	}");
 
-            foreach (var link in links)
-            {
-                formatted.Append(link);
-                formatted.Append(',');
-            }
+			return formatted.ToString();
+		}
 
-            // Remove trailing comma
-            formatted = formatted.Remove(formatted.Length - 1, 1);
+		private static string FormatLinks(List<string> links)
+		{
+			if (links.Count == 0)
+				return "";
+			var formatted = new StringBuilder();
 
-            return formatted.ToString();
-        }
-    }
+			// So we can remove the trailing comma at the end,
+			// but we want to preserve the ordering of links
+			var lastLink = links[^1];
+			for (int i = 0; i < links.Count - 1; i++)
+			{
+				formatted.Append(links[i]);
+				formatted.Append(',');
+			}
+			formatted.Append(lastLink);
+
+			return formatted.ToString();
+		}
+	}
 }

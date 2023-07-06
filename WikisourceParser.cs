@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace WikipediaMetric
 {
     static partial class WikimediaParser
     {
-        private static Logger _logger;
+        private static readonly Logger _logger;
 
         private static string _pageTag;
         private static StringBuilder _pageBuffer;
@@ -39,7 +40,7 @@ namespace WikipediaMetric
 
         public static TMap ParseFrom(string path)
         {
-            _logger.Info("Reading file: " + path);
+            _logger.Info("Reading wikisource file: " + path);
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             foreach (string currentLine in FileManager.GetLines(path))
@@ -82,7 +83,10 @@ namespace WikipediaMetric
                 var links = _linksRegex.Matches(text);
 
                 // Map links from the page to the corresponding title
-                var linksList = from link in links select link.Groups[1].Value;
+                var linksList = new List<string>(links.Count);
+                foreach (var link in links.Cast<Match>())
+                    linksList.Add(link.Groups[1].Value);
+
                 _titleLinksMap.Add(title, linksList);
 
                 // Clear the buffer so we can read to again a new page
