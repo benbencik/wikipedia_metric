@@ -60,23 +60,27 @@ namespace WikipediaMetric
 			var map = new TMap();
 
 			// We discarded the first line since it is the '[' opening char
+			// and also each '}' closing chars as well as the final last ']'
 			while (linesEnumerator.MoveNext())
 			{
 				if (linesEnumerator.Current.ToString().Trim() == "{")
 				{
+					// Read `"title": "TITLE"` line
 					linesEnumerator.MoveNext();
 					var titleString = linesEnumerator.Current.ToString().Split(":")[1];
-					// Remove the parentheses
+					// Remove the quotes from "TITLE"
 					var title = titleString[2..^2];
 
+					// Read `"links": ["LINK1","LINK2"]` line
 					linesEnumerator.MoveNext();
 					var linksArray = linesEnumerator.Current.ToString().Split(":")[1];
-					// Remove the ` ["` from the start and `"],` from the end
-					linksArray = linksArray[3..^2];
+					// Remove the ` [` from the start and `],` from the end
+					linksArray = linksArray[2..^2];
 
 					var links = new List<string>();
 					foreach (var link in linksArray.Split(","))
-						links.Add(link);
+						// Remove quotes from each `"LINKn"`
+						links.Add(link[1..^2]);
 
 					map.Add(title, links);
 				}
@@ -92,11 +96,7 @@ namespace WikipediaMetric
 			formatted.AppendLine("	{");
 
 			formatted.AppendLine($@"		""title"": ""{pair.Key}"",");
-			var formatedLinks = FormatLinks(pair.Value);
-			if (formatedLinks.Length > 0)
-				formatted.AppendLine($@"		""links"": [""{FormatLinks(pair.Value)}""]");
-			else
-				formatted.AppendLine($@"		""links"": []");
+			formatted.AppendLine($@"		""links"": [{FormatLinks(pair.Value)}]");
 
 			if (trailingComma)
 				formatted.AppendLine("	},");
@@ -114,10 +114,10 @@ namespace WikipediaMetric
 
 			// So we can remove the trailing comma at the end,
 			// but we want to preserve the ordering of links
-			var lastLink = links[^1];
+			var lastLink = "\"" + links[^1] + "\"";
 			for (int i = 0; i < links.Count - 1; i++)
 			{
-				formatted.Append(links[i]);
+				formatted.Append("\"" + links[i] + "\"");
 				formatted.Append(',');
 			}
 			formatted.Append(lastLink);
