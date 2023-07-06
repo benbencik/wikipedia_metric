@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -42,7 +41,6 @@ namespace WikipediaMetric
         {
             _logger.Info("Reading wikisource file: " + path);
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
             foreach (string currentLine in FileManager.GetLines(path))
             {
                 // Detect start and end of a page
@@ -63,8 +61,6 @@ namespace WikipediaMetric
                     _pageBuffer.Append(currentLine);
                 }
             }
-            stopwatch.Stop();
-            _logger.Info($"Finished in {stopwatch.ElapsedMilliseconds}ms.");
 
             return _titleLinksMap;
         }
