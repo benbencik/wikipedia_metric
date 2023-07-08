@@ -1,3 +1,5 @@
+using System.Net.Mime;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
@@ -66,25 +68,26 @@ namespace WikipediaMetric
 				{
 					// Read `"title": "TITLE"` line
 					linesEnumerator.MoveNext();
-					var titleString = linesEnumerator.Current.ToString().Split(":")[1];
+					var titleString = linesEnumerator.Current.ToString().Split(": ")[1];
 					// Remove the quotes from "TITLE"
-					var title = titleString[2..^2];
+					var title = Encoding.UTF8.GetString(Convert.FromBase64String(titleString[1..^2]));
 
 					// Read `"links": ["LINK1","LINK2"]` line
 					linesEnumerator.MoveNext();
-					var linksArray = linesEnumerator.Current.ToString().Split(":")[1];
-					// Remove the ` [` from the start and `],` from the end
-					linksArray = linksArray[2..^2];
+					var linksArray = linesEnumerator.Current.ToString().Split(": ")[1];
+					// Remove the `[` from the start and `],` from the end
+					linksArray = linksArray[1..^1];
 
 					var links = new List<string>();
 					foreach (var link in linksArray.Split(","))
+					{
 						// Remove quotes from each `"LINKn"`
-						links.Add(link[1..^2]);
-
+						if (link.Length > 1)
+							links.Add(Encoding.UTF8.GetString(Convert.FromBase64String(link[1..^1])));
+					}
 					map.Add(title, links);
 				}
 			}
-
 			return map;
 		}
 
@@ -94,7 +97,7 @@ namespace WikipediaMetric
 
 			formatted.AppendLine("	{");
 
-			formatted.AppendLine($@"		""title"": ""{pair.Key}"",");
+			formatted.AppendLine($@"		""title"": ""{Convert.ToBase64String(Encoding.UTF8.GetBytes(pair.Key))}"",");
 			formatted.AppendLine($@"		""links"": [{FormatLinks(pair.Value)}]");
 
 			if (trailingComma)
@@ -113,10 +116,10 @@ namespace WikipediaMetric
 
 			// So we can remove the trailing comma at the end,
 			// but we want to preserve the ordering of links
-			var lastLink = "\"" + links[^1] + "\"";
+			var lastLink = "\"" + Convert.ToBase64String(Encoding.UTF8.GetBytes(links[^1])) + "\"";
 			for (int i = 0; i < links.Count - 1; i++)
 			{
-				formatted.Append("\"" + links[i] + "\"");
+				formatted.Append("\"" + Convert.ToBase64String(Encoding.UTF8.GetBytes(links[i])) + "\"");
 				formatted.Append(',');
 			}
 			formatted.Append(lastLink);

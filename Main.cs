@@ -19,8 +19,14 @@ namespace WikipediaMetric
                 // var map = WikimediaParser.ParseFrom("data/enwiki-20230401-pages-articles-multistream1.xml-p1p41242");
                 // JsonManager.ToFile(map, "data/enwiki-20230401.json");
 
-                var map = JsonManager.FromFile("data/enwiki-dummy.json");
-                JsonManager.ToFile(map, "data/enwiki-dummy-test.json");
+                // var map = JsonManager.FromFile("data/enwiki-dummy.json");
+                // JsonManager.ToFile(map, "data/enwiki-dummy-test.json");
+                var map = JsonManager.FromFile("data/enwiki-20230401.json");
+                JsonManager.ToFile(map, "data/enwiki-20230401-test.json");
+
+                // var map = WikimediaParser.ParseFrom("data/albedo_test.txt");
+                // JsonManager.ToFile(map, "data/albedo_test.json");
+                // var map = JsonManager.FromFile("data/albedo_test.json");
             }
             catch (Exception e)
             {
