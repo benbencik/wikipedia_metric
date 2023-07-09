@@ -1,58 +1,54 @@
-using System;
-using System.Collections;
-using System.Diagnostics;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-using TMap = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>;
-
-namespace WikipediaMetric
+namespace wikipedia_metric
 {
-    internal partial class WikimediaParser
+    internal static partial class WikimediaParser
     {
-        private static Logger _logger;
+        private static readonly Logger Logger;
 
-        private static string _pageTag;
-        private static StringBuilder _pageBuffer;
+        private static readonly string PageTag;
+
+        private static readonly StringBuilder PageBuffer;
+
         // true if reading contents of (inside of) a page (<page> contents </page>)
         private static bool _readingPage;
 
-        private static Regex _titleRegex;
-        private static Regex _textRegex;
-        private static Regex _linksRegex;
+        private static readonly Regex TitleRegex;
+        private static readonly Regex TextRegex;
+        private static readonly Regex LinksRegex;
 
         // Map page title with its links
-        private static TMap _map;
+        private static readonly TMap TitleLinksMap;
 
         static WikimediaParser()
         {
-            _logger = new Logger(nameof(WikimediaParser));
+            Logger = new Logger(nameof(WikimediaParser));
 
-            _pageTag = "page>";
-            _pageBuffer = new();
+            PageTag = "page>";
+            PageBuffer = new StringBuilder();
             _readingPage = false;
 
-            _titleRegex = titleRegex();
-            _textRegex = textRegex();
-            _linksRegex = linksRegex();
+            TitleRegex = titleRegex();
+            TextRegex = textRegex();
+            LinksRegex = linksRegex();
 
-            _map = new();
+            TitleLinksMap = new TMap();
         }
 
         public static TMap ParseFrom(string path)
         {
-            _logger.Info("Reading file: " + path);
+            Logger.Info("Reading wikisource file: " + path);
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            foreach (string currentLine in GetLines(path))
+            foreach (string currentLine in FileManager.GetLines(path))
             {
                 // Detect start and end of a page
                 // We are detecting only `page>` since wikisource dumps are
                 // valid XML files so there is always only one opening and
                 // one corresponding closing tag
-                if (currentLine.Contains(_pageTag))
+                if (currentLine.Contains(PageTag))
                 {
                     ProcessPage();
                     _readingPage = !_readingPage;
@@ -63,54 +59,41 @@ namespace WikipediaMetric
                 {
                     // Read the page content to a buffer
                     // Page content is between <page> and </page> tags
-                    _pageBuffer.Append(currentLine);
+                    PageBuffer.Append(currentLine);
                 }
             }
-            stopwatch.Stop();
-            _logger.Info($"Finished in {stopwatch.ElapsedMilliseconds}ms.");
 
-            return _map;
+            return TitleLinksMap;
         }
 
         private static void ProcessPage()
         {
             // We detected _pageTag and we are _readingPage so it must be
             // the closing tag, hence we process the page in the _pageBuffer
-            if (_readingPage)
-            {
-                // Get page title
-                var title = _titleRegex.Matches(_pageBuffer.ToString())[0].Groups[1].Value;
-                // Get page text so we can extract links
-                var text = _textRegex.Matches(_pageBuffer.ToString())[0].Groups[1].Value;
-                // Extract links from the page text
-                var links = _linksRegex.Matches(text);
+            if (!_readingPage) return;
+            // Get page title
+            var title = TitleRegex.Matches(PageBuffer.ToString())[0].Groups[1].Value;
+            // Get page text so we can extract links
+            var text = TextRegex.Matches(PageBuffer.ToString())[0].Groups[1].Value;
+            // Extract links from the page text
+            var links = LinksRegex.Matches(text);
 
-                // Map links from the page to the corresponding title
-                var linksList = from link in links select link.Groups[1].Value;
-                _map.Add(title, linksList);
+            // Map links from the page to the corresponding title
+            var linksList = new List<string>(links.Count);
+            linksList.AddRange(links.Select(link => link.Groups[1].Value));
 
-                // Clear the buffer so we can read to again a new page
-                _pageBuffer.Clear();
-            }
-        }
+            TitleLinksMap.Add(title, linksList);
 
-        private static IEnumerable GetLines(string path)
-        {
-            try
-            {
-                return File.ReadLines(path);
-            }
-            catch (Exception)
-            {
-                _logger.Error("An error occured during reading the wikimedia file.");
-                throw;
-            }
+            // Clear the buffer so we can read to again a new page
+            PageBuffer.Clear();
         }
 
         [GeneratedRegex(@"<title[^>]*>([^<]*)<\/title>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex titleRegex();
+
         [GeneratedRegex(@"<text[^>]*>([^<]*)<\/text>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex textRegex();
+
         [GeneratedRegex(@"\[\[(?!File:)([^\[\]|]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex linksRegex();
     }

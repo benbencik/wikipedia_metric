@@ -1,6 +1,6 @@
 using System;
 
-namespace WikipediaMetric
+namespace wikipedia_metric
 {
     public enum LogLevel
     {
@@ -9,28 +9,26 @@ namespace WikipediaMetric
         Error
     }
 
-    class Logger
+    internal class Logger
     {
         private readonly string _instanceName;
         public Logger(string instanceName) => _instanceName = instanceName;
 
         private void Log(LogLevel level, object message)
         {
-            string logEntry = $"{DateTime.Now} - [{level}] - {message}";
+            var logEntry = $"{DateTime.Now} - [{level}] - {message}";
 
-            switch (level)
+            Console.ForegroundColor = level switch
             {
-                case LogLevel.Info:
-                    Console.ForegroundColor = ConsoleColor.White; // Set color for Info logs
-                    break;
-                case LogLevel.Warning:
-                    Console.ForegroundColor = ConsoleColor.Yellow; // Set color for Warning logs
-                    break;
-                case LogLevel.Error:
-                    Console.ForegroundColor = ConsoleColor.Red; // Set color for Error logs
-                    break;
-            }
-            Console.WriteLine("(" + _instanceName + ")" + ": " + logEntry);  // Log to console
+                LogLevel.Info => ConsoleColor.White // Set color for Info logs
+                ,
+                LogLevel.Warning => ConsoleColor.Yellow // Set color for Warning logs
+                ,
+                LogLevel.Error => ConsoleColor.Red // Set color for Error logs
+                ,
+                _ => Console.ForegroundColor
+            };
+            Console.WriteLine("(" + _instanceName + ")" + ": " + logEntry); // Log to console
             Console.ResetColor(); // Reset console color
         }
 
