@@ -26,6 +26,20 @@ namespace WikipediaMetric
             }
         }
 
+        // Opens StreamWriter for a given path
+        public static StreamReader GetStreamReader(string filePath)
+        {
+            try
+            {
+                return new StreamReader(filePath);
+            }
+            catch (Exception)
+            {
+                _logger.Error("An error occured during opening the StreamReader for a given path: " + filePath);
+                throw;
+            }
+        }
+
         // Returns an IEnumerable of a file lines at a given path
         public static IEnumerable GetLines(string filePath)
         {
