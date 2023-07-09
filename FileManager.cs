@@ -7,10 +7,12 @@ namespace wikipedia_metric
     internal static class FileManager
     {
         private static readonly Logger Logger;
+
         static FileManager()
         {
             Logger = new Logger(nameof(FileManager));
         }
+
         // Opens StreamWriter for a given path
         public static StreamWriter GetStreamWriter(string filePath)
         {
