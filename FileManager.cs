@@ -2,15 +2,14 @@ using System;
 using System.Collections;
 using System.IO;
 
-namespace WikipediaMetric
+namespace wikipedia_metric
 {
-
-    static class FileManager
+    internal static class FileManager
     {
-        private static readonly Logger _logger;
+        private static readonly Logger Logger;
         static FileManager()
         {
-            _logger = new Logger(nameof(FileManager));
+            Logger = new Logger(nameof(FileManager));
         }
         // Opens StreamWriter for a given path
         public static StreamWriter GetStreamWriter(string filePath)
@@ -21,7 +20,7 @@ namespace WikipediaMetric
             }
             catch (Exception)
             {
-                _logger.Error("An error occured during opening the StreamWriter for a given path: " + filePath);
+                Logger.Error("An error occured during opening the StreamWriter for a given path: " + filePath);
                 throw;
             }
         }
@@ -35,7 +34,7 @@ namespace WikipediaMetric
             }
             catch (Exception)
             {
-                _logger.Error("An error occured during opening the StreamReader for a given path: " + filePath);
+                Logger.Error("An error occured during opening the StreamReader for a given path: " + filePath);
                 throw;
             }
         }
@@ -49,7 +48,7 @@ namespace WikipediaMetric
             }
             catch (Exception)
             {
-                _logger.Error("An error occured during reading the file: " + filePath);
+                Logger.Error("An error occured during reading the file: " + filePath);
                 throw;
             }
         }

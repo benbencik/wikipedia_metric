@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WikipediaMetric
+namespace wikipedia_metric
 {
-
-	static class JsonManager
+	internal static class JsonManager
 	{
 		private struct Char
 		{
@@ -13,9 +12,7 @@ namespace WikipediaMetric
 			public const char CurlyLeftBracket = '{';
 			public const char CurlyRightBracket = '}';
 			public const char Comma = ',';
-			public const char Colon = ':';
 			public const char DoubleQuote = '\"';
-			public const char NewLine = '\n';
 		}
 
 		private enum State
@@ -35,24 +32,25 @@ namespace WikipediaMetric
 			LinkValueRead
 		}
 
-		private static readonly Logger _logger;
+		private static readonly Logger Logger;
 
 		static JsonManager()
 		{
-			_logger = new Logger(nameof(JsonManager));
+			Logger = new Logger(nameof(JsonManager));
 		}
+
 		// Saves TMap of page titles and corresponding links to a json file
 		public static void ToFile(TMap titleLinksMap, string filePath)
 		{
-			_logger.Info("Saving TMap to the file: " + filePath);
+			Logger.Info("Saving TMap to the file: " + filePath);
 
 			using var file = FileManager.GetStreamWriter(filePath);
-			var titleLinksMapEnumerator = titleLinksMap.GetEnumerator();
+			using var titleLinksMapEnumerator = titleLinksMap.GetEnumerator();
 
-			// If Tmap is empty write nothing to the file
+			// If TMap is empty write nothing to the file
 			if (!titleLinksMapEnumerator.MoveNext())
 			{
-				_logger.Warning("TMap is empty.");
+				Logger.Warning("TMap is empty.");
 				return;
 			}
 
@@ -71,10 +69,10 @@ namespace WikipediaMetric
 			file.WriteLine("]");
 		}
 
-		// Loads Tmap of page titles and corresponding links from a json file
+		// Loads TMap of page titles and corresponding links from a json file
 		public static TMap FromFile(string filePath)
 		{
-			_logger.Info("Loading TMap from the file: " + filePath);
+			Logger.Info("Loading TMap from the file: " + filePath);
 
 			using var file = FileManager.GetStreamReader(filePath);
 			var map = new TMap();
@@ -82,89 +80,128 @@ namespace WikipediaMetric
 			var title = new StringBuilder();
 			var link = new StringBuilder();
 			var state = State.Discard;
-			var end = false;
 
 			while (file.Peek() >= 0)
 			{
-				if (end)
-					break;
 				var ch = (char)file.Read();
 				switch (ch)
 				{
 					case Char.LeftBracket:
-						if (state == State.Discard)
-							state = State.Map;
-						else if (state == State.LinksTagRead)
+						state = state switch
 						{
-							state = State.LinksArray;
-						}
-						//map.Clear();
+							State.Discard => State.Map,
+							State.LinksTagRead => State.LinksArray,
+							_ => state
+						};
 						break;
 					case Char.CurlyLeftBracket:
-						state = State.PairTitle;
+						switch (state)
+						{
+							case State.Map:
+								state = State.PairTitle;
+								break;
+							case State.TitleValue:
+								title.Append(ch);
+								break;
+							case State.LinkValue:
+								link.Append(ch);
+								break;
+						}
+
 						break;
 					case Char.CurlyRightBracket:
-						if (state == State.Map)
+						switch (state)
 						{
-							state = State.Map;
-							map.Add(title.ToString(), links);
+							case State.Map:
+								state = State.Map;
+								map.Add(title.ToString(), links);
 
-							title.Clear();
-							links = new List<string>();
+								title.Clear();
+								links = new List<string>();
+								break;
+							case State.TitleValue:
+								title.Append(ch);
+								break;
+							case State.LinkValue:
+								link.Append(ch);
+								break;
 						}
+
 						break;
 					case Char.DoubleQuote:
-						if (state == State.PairTitle)
-							state = State.TitleTag;
-						else if (state == State.TitleTag)
-							state = State.TitleTagRead;
-						else if (state == State.TitleTagRead)
-							state = State.TitleValue;
-						else if (state == State.TitleValue)
-							state = State.TitleValueRead;
-
-						else if (state == State.PairLinks)
-							state = State.LinksTag;
-						else if (state == State.LinksTag)
-							state = State.LinksTagRead;
-						else if (state == State.LinksArray)
-							state = State.LinkValue;
-						else if (state == State.LinkValue)
+						switch (state)
 						{
-							state = State.LinkValueRead;
-							links.Add(link.ToString());
-							link.Clear();
+							case State.PairTitle:
+								state = State.TitleTag;
+								break;
+							case State.TitleTag:
+								state = State.TitleTagRead;
+								break;
+							case State.TitleTagRead:
+								state = State.TitleValue;
+								break;
+							case State.TitleValue:
+								state = State.TitleValueRead;
+								break;
+							case State.PairLinks:
+								state = State.LinksTag;
+								break;
+							case State.LinksTag:
+								state = State.LinksTagRead;
+								break;
+							case State.LinksArray:
+								state = State.LinkValue;
+								break;
+							case State.LinkValue:
+								state = State.LinkValueRead;
+								links.Add(link.ToString());
+								link.Clear();
+								break;
 						}
-						break;
-					case Char.Colon:
+
 						break;
 					case Char.Comma:
-						if (state == State.TitleValueRead)
-							state = State.PairLinks;
-						else if (state == State.LinkValueRead)
+						switch (state)
 						{
-							state = State.LinksArray;
+							case State.TitleValue:
+								title.Append(ch);
+								break;
+							case State.TitleValueRead:
+								state = State.PairLinks;
+								break;
+							case State.LinkValue:
+								link.Append(ch);
+								break;
+							case State.LinkValueRead:
+								state = State.LinksArray;
+								break;
 						}
-						else if (state == State.TitleValue)
-							title.Append(ch);
-						else if (state == State.LinkValue)
-							link.Append(ch);
+
 						break;
 					case Char.RightBracket:
-						if (state == State.Map)
-							state = State.Discard;
-						else if (state == State.LinkValueRead)
-							state = State.Map;
-						// return map
+						state = state switch
+						{
+							State.Map => State.Discard,
+							State.LinksArray => State.Map,
+							State.LinkValueRead => State.Map,
+							_ => state
+						};
 						break;
 					default:
-						if (state == State.TitleValue)
-							title.Append(ch);
-						else if (state == State.LinkValue)
-							link.Append(ch);
+						switch (state)
+						{
+							case State.TitleValue:
+								title.Append(ch);
+								break;
+							case State.LinkValue:
+								link.Append(ch);
+								break;
+						}
+
 						break;
 				}
 			}
+
 			return map;
 		}
 
@@ -177,10 +214,7 @@ namespace WikipediaMetric
 			formatted.AppendLine($@"		""title"": ""{pair.Key}"",");
 			formatted.AppendLine($@"		""links"": [{FormatLinks(pair.Value)}]");
 
-			if (trailingComma)
-				formatted.AppendLine("	},");
-			else
-				formatted.AppendLine("	}");
+			formatted.AppendLine(trailingComma ? "	}," : "	}");
 
 			return formatted.ToString();
 		}
@@ -194,11 +228,12 @@ namespace WikipediaMetric
 			// So we can remove the trailing comma at the end,
 			// but we want to preserve the ordering of links
 			var lastLink = "\"" + links[^1] + "\"";
-			for (int i = 0; i < links.Count - 1; i++)
+			for (var i = 0; i < links.Count - 1; i++)
 			{
 				formatted.Append("\"" + links[i] + "\"");
 				formatted.Append(',');
 			}
+
 			formatted.Append(lastLink);
 
 			return formatted.ToString();

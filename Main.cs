@@ -3,14 +3,14 @@ using System;
 using System.Diagnostics;
 
 
-namespace WikipediaMetric
+namespace wikipedia_metric
 {
-    class Program
+    internal static class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var _logger = new Logger(nameof(Main));
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            var logger = new Logger(nameof(Main));
+            var stopwatch = Stopwatch.StartNew();
 
             try
             {
@@ -30,12 +30,11 @@ namespace WikipediaMetric
             }
             catch (Exception e)
             {
-                _logger.Error(e);
+                logger.Error(e);
             }
 
             stopwatch.Stop();
-            _logger.Info($"Finished in {stopwatch.ElapsedMilliseconds}ms.");
+            logger.Info($"Finished in {stopwatch.ElapsedMilliseconds}ms.");
         }
     }
 }
-
