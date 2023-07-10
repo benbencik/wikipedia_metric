@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace WikipediaMetric
+namespace wikipedia_metric
 {
     public class Graph<T>
     {

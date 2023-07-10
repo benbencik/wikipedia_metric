@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace WikipediaMetric
+namespace wikipedia_metric
 {
     /* Class for finding closes distance of two articles */
     public class Search

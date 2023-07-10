@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace WikipediaMetric
+namespace wikipedia_metric
 {
     public class Benchmark
     {
