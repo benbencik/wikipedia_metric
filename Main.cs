@@ -1,12 +1,13 @@
-﻿global using TMap = System.Collections.Generic.Dictionary<string, System.Collections.Generic.List<string>>;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-
 
 namespace wikipedia_metric
 {
     internal static class Program
     {
+
+
         private static void Main(string[] args)
         {
             var logger = new Logger(nameof(Main));
@@ -16,17 +17,25 @@ namespace wikipedia_metric
             {
                 // var map = WikimediaParser.ParseFrom("data/wikisource_dummy.txt");
                 // JsonManager.ToFile(map, "data/enwiki-dummy-new.json");
-                // var map = WikimediaParser.ParseFrom("data/enwiki-20230401-pages-articles-multistream1.xml-p1p41242");
-                // JsonManager.ToFile(map, "data/enwiki-20230401-new.json");
+                // var map = WikimediaParser.ParseFrom("data/enwikisource-20230701-pages-articles.xml");
+                // JsonManager.ToFile(map, "data/enwikisource-20230701-pages-articles.json");
+                // var map = JsonManager.FromFile("data/enwikisource-20230701-pages-articles.json");
 
                 // var map = JsonManager.FromFile("data/enwiki-dummy.json");
                 // JsonManager.ToFile(map, "data/enwiki-dummy-test.json");
-                var map = JsonManager.FromFile("data/enwiki-20230401-new.json");
-                JsonManager.ToFile(map, "data/enwiki-20230401-new-test.json");
+                // var map = JsonManager.FromFile("data/enwiki-20230401-new.json");
+                // JsonManager.ToFile(map, "data/enwiki-20230401-new-test.json");
 
-                // var map = WikimediaParser.ParseFrom("data/albedo_test.txt");
-                // JsonManager.ToFile(map, "data/albedo_test.json");
-                // var map = JsonManager.FromFile("data/albedo_test.json");
+                var paths = new List<Blob>()
+                {
+                    { new Blob("NATO", 566, new List<string>() { "Airport" }) },
+                    { new Blob("Airport", 250, new List<string>() { "NATO", "Transport", "TEST" }) },
+                    { new Blob("TEST", 250, new List<string>() { "Transport", "Airport" }) },
+                    { new Blob("Transport", 1, new List<string>() { "Airport", "TEST" }) }
+                };
+
+                var painter = new Painter(1000, 15, 10);
+                painter.Print(paths);
             }
             catch (Exception e)
             {
