@@ -1,18 +1,20 @@
-using System.Reflection.Metadata;
+using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
+using System.Xml;
 
 namespace wikipedia_metric
 {
-    public class Blob
+    public class Blob : IComparable<Blob>
     {
         public string Name;
         public List<string> Neighbours;
 
         public (double X, double Y) Coords;
         public double Radius;
+        public double Phi;
 
         public int SelectAttempts;
 
@@ -23,9 +25,25 @@ namespace wikipedia_metric
             Neighbours = neighbours;
         }
 
-        public void Reset()
+        public int CompareTo(Blob other)
+        {
+            return Name.CompareTo(other.Name);
+        }
+
+        public void TrySelect((double X, double Y) coords, double phi)
+        {
+            Coords = coords;
+            Phi = phi;
+            SelectAttempts++;
+        }
+        public void ResetAttempts()
         {
             SelectAttempts = 0;
+        }
+        public void Reset()
+        {
+            Coords = (0, 0);
+            Phi = 0;
         }
     }
 
@@ -41,7 +59,10 @@ namespace wikipedia_metric
         private readonly int MinSize; // px
 
         private List<Blob> AllBlobs;
-        private List<Blob> SelectedToDraw;
+        private HashSet<Blob> SelectedToDraw = new HashSet<Blob>();
+
+        private Random Rnd;
+        private readonly int[] Signs = new int[2] { -1, 1 };
 
         static Painter()
         {
@@ -54,6 +75,8 @@ namespace wikipedia_metric
             CanvasSize = canvas;
             UsableCanvasSize = CanvasSize - 2 * BorderSize;
             MinSize = minimalBlobSize;
+
+            Rnd = new Random();
         }
 
         // Ensure we can fit all the blobs to the canvas by rescaling them
@@ -62,7 +85,7 @@ namespace wikipedia_metric
             // Calculate the scale so we can multiply sizes of each blob
             // so they all can fit on the canvas
             double scalingConstant =
-                UsableCanvasSize / (AllBlobs.Sum(blob => blob.Radius * 2) + MinSize * AllBlobs.Count);
+                (UsableCanvasSize + 1000) / (AllBlobs.Sum(blob => blob.Radius * 2) + MinSize * AllBlobs.Count);
 
             foreach (var blob in AllBlobs)
             {
@@ -74,8 +97,11 @@ namespace wikipedia_metric
 
         // Check if the blob we want to select to draw
         // conflicts with any other already selected blobs
-        private bool CheckIfConflicts(Blob blob)
+        private bool Conflicts(Blob origin, Blob blob, List<Blob> list)
         {
+            if (blob.SelectAttempts == 0)
+                return true;
+
             foreach (var selected in SelectedToDraw)
             {
                 var distance = Math.Sqrt(
@@ -83,102 +109,115 @@ namespace wikipedia_metric
                     Math.Pow(blob.Coords.Y - selected.Coords.Y, 2)
                 );
 
+                if ((distance == blob.Radius + selected.Radius) && (selected.CompareTo(origin) == 0))
+                    continue;
+
                 if (distance <= blob.Radius + selected.Radius)
                     return true;
+
+            }
+
+            foreach (var selected in list)
+            {
+                var distance = Math.Sqrt(
+                    Math.Pow(blob.Coords.X - selected.Coords.X, 2) +
+                    Math.Pow(blob.Coords.Y - selected.Coords.Y, 2)
+                );
+
+                if ((distance == blob.Radius + selected.Radius) && (selected.CompareTo(origin) == 0))
+                    continue;
+
+                if (distance <= blob.Radius + selected.Radius)
+                    return true;
+
             }
 
             return false;
         }
 
-        // Go through all the paths and generate coordinates for each blob with respective radiuses so no blobs overlap.
-        // Start in the centre of the canvas and draw a blob, than go thgough all of his Neighbours list and generate
-        // coordinates for every neighbour. Than choose one of the neighbours and repeat recursively until all blobs
-        // from path are selected do draw (have their coordinates and sizes correctly generated).
-        // Each neighbouring blobs needs to be touching each other.
-        // When some blobs overlap try 10 times to generate new coordinates for the blob and if it fails, backtrack
-        //to the previous blob and regenerate its coordinates and repeat until all blobs are slected to draw.
-        public void Print(List<Blob> paths)
+        private List<Blob> PrintPath(Blob node)
         {
-            AllBlobs = paths;
-            RescaleBlobs();
-
-            var rnd = new Random();
-            var signs = new int[2] { -1, 1 };
-
-            // Start in the centre of the canvas
-            var x0 = CanvasSize / 2;
-            var y0 = CanvasSize / 2;
-
-            // Generate coordinates for the first blob
-            var blob = AllBlobs[0];
-            var r0 = blob.Radius;
-            blob.Coords = (x0, y0);
-
-            // Add the first blob to the list of selected blobs
-            SelectedToDraw = new List<Blob> { blob };
-
-            // Go through all the blobs and generate coordinates for each blob
-            // with respective radiuses so no blobs overlap
-            for (var i = 1; i < AllBlobs.Count; i++)
+            var list = new List<Blob>() { node };
+            SelectedToDraw.Add(node);
+            if (node.Neighbours.Count == 0)
             {
-                blob = AllBlobs[i];
+                return list;
+            }
 
-                // Reset the number of attempts to generate coordinates for the blob
-                blob.Reset();
+            Blob[] selectedTest = new Blob[SelectedToDraw.Count];
+            SelectedToDraw.CopyTo(selectedTest);
 
-                // Generate coordinates for the blob
-                for (var attempt = 0; attempt < 10; attempt++)
+            foreach (var neigh_name in node.Neighbours)
+            {
+                var neigh_node = AllBlobs.Find(x => x.Name == neigh_name);
+
+                // This should not be needed
+                if (list.Contains(neigh_node))
+                    Logger.Warning($"Node {neigh_name} already selected to draw");
+
+                List<Blob> test = null;
+                while (neigh_node.SelectAttempts <= 10 && test == null)
                 {
-                    // Generate random angle
-                    var phi = signs[rnd.Next(0, 2)] * (rnd.NextDouble() * Math.PI * 2);
+                    var phi = node.Phi + (Signs[Rnd.Next(0, 2)] * (Rnd.NextDouble() * Math.PI));
+                    var x = node.Coords.X + Math.Sin(phi) * (node.Radius + neigh_node.Radius);
+                    var y = node.Coords.Y + Math.Cos(phi) * (node.Radius + neigh_node.Radius);
+                    neigh_node.TrySelect((x, y), phi);
 
-                    // Generate random radius
-                    var r = blob.Radius;
-
-                    // Calculate coordinates
-                    double x = x0 + Math.Sin(phi) * (r0 + r);
-                    double y = y0 + Math.Cos(phi) * (r0 + r);
-
-                    // Set coordinates
-                    blob.Coords = (x, y);
-
-                    // Check if the blob conflicts with any other already selected blobs
-                    if (!CheckIfConflicts(blob))
+                    if (!Conflicts(node, neigh_node, list))
                     {
-                        // If it doesn't conflict, add it to the list of selected blobs
-                        SelectedToDraw.Add(blob);
+                        test = PrintPath(neigh_node);
+                        if (test == null)
+                        {
+                            foreach (var n in SelectedToDraw)
+                            {
+                                if (selectedTest.Contains(n))
+                                    continue;
+                                if (n == neigh_node)
+                                {
+                                    n.Reset();
+                                }
+                                else
+                                {
+                                    n.ResetAttempts();
+                                }
+                                SelectedToDraw.Remove(n);
 
-                        // Set the new centre of the canvas
-                        x0 = x;
-                        y0 = y;
-                        r0 = r;
-
-                        // Break out of the loop
-                        break;
+                            }
+                        }
                     }
                 }
 
-                // If we tried 10 times to generate coordinates for the blob and failed, backtrack
-                // to the previous blob and regenerate its coordinates and repeat until all blobs are slected to draw
-                if (blob.SelectAttempts >= 10)
+                if (neigh_node.SelectAttempts > 10)
                 {
-                    // Remove the blob from the list of selected blobs
-                    SelectedToDraw.Remove(blob);
-
-                    // Remove alsoo all SelectedToDraw neighbours
-                    foreach (var neighbour in blob.Neighbours)
-                        SelectedToDraw.RemoveAll(b => b.Name == neighbour);
-
-                    // Set the new centre of the canvas
-                    x0 = SelectedToDraw.Last().Coords.X;
-                    y0 = SelectedToDraw.Last().Coords.Y;
-                    r0 = SelectedToDraw.Last().Radius;
-
-                    // Go back to the previous blob and try again to generate coordinates for it
-                    i -= 2;
+                    neigh_node.Reset();
+                    neigh_node.ResetAttempts();
+                    return null;
+                }
+                else
+                {
+                    list.AddRange(test);
                 }
             }
-            SaveImage(SelectedToDraw);
+            // list.AddRange(test);
+            return list;
+        }
+
+        // Set coordinates for each blob center so no blob intersects and each blob is connected only with its neighbours
+        public List<Blob> PrepareToDraw(List<Blob> tree)
+        {
+            AllBlobs = tree;
+            RescaleBlobs();
+
+            double phi0 = 0;
+            double x0 = 0;
+            double y0 = 0;
+            var start = tree[0];
+            start.TrySelect((x0, y0), phi0);
+
+
+            var test = PrintPath(start);
+            SaveImage(test);
+            return test;
         }
 
         // A function that generates and saves a svg image from the SelectedToDraw array
@@ -186,11 +225,11 @@ namespace wikipedia_metric
         public void SaveImage(List<Blob> selectedToDraw)
         {
             // Create a new image with a white background
-            var image = new Bitmap((int)2000, (int)2000);
+            var image = new Bitmap((int)1000, (int)1000);
 
             // Get a graphics object from the image
             var graphics = Graphics.FromImage(image);
-            graphics.FillRectangle(new SolidBrush(Color.White), new RectangleF(0, 0, (float)2000, (float)2000));
+            graphics.FillRectangle(new SolidBrush(Color.White), new RectangleF(0, 0, (float)1000, (float)1000));
 
             // Set the color of the brush to black
             var brush = new Pen(Color.Black);
@@ -202,6 +241,7 @@ namespace wikipedia_metric
                 var rect = new RectangleF((float)(blob.Coords.X - blob.Radius + 500), (float)(blob.Coords.Y - blob.Radius + 500), (float)blob.Radius * 2, (float)blob.Radius * 2);
 
                 // Draw the blob on the image
+                graphics.DrawString(blob.Name, new Font("Calibri", 8), Brushes.Black, rect);
                 graphics.DrawEllipse(brush, rect);
             }
 
