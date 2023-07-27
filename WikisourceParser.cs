@@ -1,3 +1,5 @@
+global using TitleLinksMap = System.Collections.Generic.Dictionary<string, System.Collections.Generic.HashSet<string>>;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +23,7 @@ namespace wikipedia_metric
         private static readonly Regex LinksRegex;
 
         // Map page title with its links
-        private static readonly TMap TitleLinksMap;
+        private static readonly TitleLinksMap TitleLinksMap;
 
         static WikimediaParser()
         {
@@ -31,14 +33,18 @@ namespace wikipedia_metric
             PageBuffer = new StringBuilder();
             _readingPage = false;
 
+            // Load precompiled regexes
             TitleRegex = titleRegex();
             TextRegex = textRegex();
             LinksRegex = linksRegex();
 
-            TitleLinksMap = new TMap();
+            TitleLinksMap = new TitleLinksMap();
         }
 
-        public static TMap ParseFrom(string path)
+        // Goes line by line (one line is always short for the Wikisource dumps
+        // so they will fit in memory) in the xml file and parses out
+        // PageTitle-PageLinks mapping for every page in the dump.
+        public static TitleLinksMap ParseFrom(string path)
         {
             Logger.Info("Reading wikisource file: " + path);
 
@@ -73,27 +79,43 @@ namespace wikipedia_metric
             if (!_readingPage) return;
             // Get page title
             var title = TitleRegex.Matches(PageBuffer.ToString())[0].Groups[1].Value;
+
             // Get page text so we can extract links
-            var text = TextRegex.Matches(PageBuffer.ToString())[0].Groups[1].Value;
+            string text;
+            try
+            {
+                text = TextRegex.Matches(PageBuffer.ToString())[0].Groups[1].Value;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                // There very rarely is just <text bytes="0"/> tag without any text in it
+                // and without the explicit closing tag
+                text = "";
+            }
+
             // Extract links from the page text
-            var links = LinksRegex.Matches(text);
+            var links = new HashSet<string>(LinksRegex.Matches(text).Select(link => link.Groups[1].Value));
 
             // Map links from the page to the corresponding title
-            var linksList = new List<string>(links.Count);
-            linksList.AddRange(links.Select(link => link.Groups[1].Value));
-
-            TitleLinksMap.Add(title, linksList);
+            if (!TitleLinksMap.TryAdd(title, links))
+                // Some titles are redundant in the whole wikipedia dump
+                TitleLinksMap[title].UnionWith(links);
 
             // Clear the buffer so we can read to again a new page
             PageBuffer.Clear();
         }
 
+        // Filters out CONTENT from following structure: <title ANYTHING> CONTENT </title>
         [GeneratedRegex(@"<title[^>]*>([^<]*)<\/title>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex titleRegex();
 
+        // Filters out CONTENT from following structure: <text ANYTHING> CONTENT </text>
         [GeneratedRegex(@"<text[^>]*>([^<]*)<\/text>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex textRegex();
 
+        // Filters out CONTENT from following structure: [[CONTENT]] except if there is [[File:ANYTHING]]
+        // Links are stored in [[LINK]] format but there is also this [[File:...]] thing for linking
+        // files which we do not want to have in our data
         [GeneratedRegex(@"\[\[(?!File:)([^\[\]|]*)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex linksRegex();
     }
