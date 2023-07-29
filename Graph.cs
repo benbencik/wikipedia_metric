@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace wikipedia_metric
 {
@@ -67,6 +69,58 @@ namespace wikipedia_metric
                     }
                 }
                 adjacencyList[item.Key] = new_list;
+            }
+        }
+
+
+        public void SearchArticles(string searchQuery)
+        {
+            string[] searchTerms = searchQuery.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            List<string> regexPatterns = new();
+
+            // Generate regex patterns for each search term
+            foreach (string searchTerm in searchTerms)
+            {
+                string processedTerm = searchTerm;
+                bool startWith = processedTerm.StartsWith("^");
+                bool endWith = processedTerm.EndsWith("$");
+                bool synonym = processedTerm.StartsWith("~");
+
+                if (startWith)
+                    processedTerm = processedTerm.TrimStart('^');
+
+                if (endWith)
+                    processedTerm = processedTerm.TrimEnd('$');
+
+                if (synonym)
+                    processedTerm = processedTerm.TrimStart('~');
+
+                // Escape special characters in the search term
+                string regexPattern = @"(?i)\b";
+
+                if (startWith)
+                    regexPattern += "^" + Regex.Escape(processedTerm);
+                else
+                    regexPattern += Regex.Escape(processedTerm);
+
+                regexPattern += @"\w*";
+
+                if (endWith)
+                    regexPattern += Regex.Escape(processedTerm) + "$";
+
+                regexPattern += @"\b";
+
+                regexPatterns.Add(regexPattern);
+            }
+
+            string combinedRegexPattern = string.Join(".*", regexPatterns);
+
+            var searchResults = nodes.Where(article => Regex.IsMatch(article, combinedRegexPattern));
+
+            Console.WriteLine($"Search Results for '{searchQuery}':");
+            foreach (var result in searchResults)
+            {
+                Console.WriteLine(result);
             }
         }
 
