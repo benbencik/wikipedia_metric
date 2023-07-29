@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace wikipedia_metric
@@ -42,18 +43,18 @@ namespace wikipedia_metric
             Logger = new Logger(nameof(JsonManager));
         }
 
-        // Saves TMap of page titles and corresponding links to a json file
-        public static void ToFile(TMap titleLinksMap, string filePath)
+        // Saves TitleLinksMap of page titles and corresponding links to a json file
+        public static void ToFile(TitleLinksMap titleLinksMap, string filePath)
         {
-            Logger.Info("Saving TMap to the file: " + filePath);
+            Logger.Info("Saving TitleLinksMap to the file: " + filePath);
 
             using var file = FileManager.GetStreamWriter(filePath);
             using var titleLinksMapEnumerator = titleLinksMap.GetEnumerator();
 
-            // If TMap is empty write nothing to the file
+            // If TitleLinksMap is empty write nothing to the file
             if (!titleLinksMapEnumerator.MoveNext())
             {
-                Logger.Warning("TMap is empty.");
+                Logger.Warning("TitleLinksMap is empty.");
                 return;
             }
 
@@ -76,14 +77,14 @@ namespace wikipedia_metric
             file.WriteLine("]");
         }
 
-        // Loads TMap of page titles and corresponding links from a json file
-        public static TMap FromFile(string filePath)
+        // Loads TitleLinksMap of page titles and corresponding links from a json file
+        public static TitleLinksMap FromFile(string filePath)
         {
-            Logger.Info("Loading TMap from the file: " + filePath);
+            Logger.Info("Loading TitleLinksMap from the file: " + filePath);
 
             using var file = FileManager.GetStreamReader(filePath); // Open a stream reader to read the file
-            var map = new TMap(); // Create a new TMap object to store the loaded data
-            var links = new List<string>(); // List to temporarily store the links for a title
+            var map = new TitleLinksMap(); // Create a new TitleLinksMap object to store the loaded data
+            var links = new HashSet<string>(); // List to temporarily store the links for a title
             var title = new StringBuilder(); // StringBuilder to build the title string
             var link = new StringBuilder(); // StringBuilder to build the link string
             var state = State.Discard; // Initial state is Discard
@@ -124,10 +125,12 @@ namespace wikipedia_metric
                                 state = State.Map;
                                 // Add the title and links to the map
                                 map.Add(title.ToString(), links);
+                                if (!map.TryAdd(title.ToString(), links))
+                                    map[title.ToString()].UnionWith(links);
                                 // Clear the title StringBuilder for the next title
                                 title.Clear();
                                 // Create a new list for the next set of links
-                                links = new List<string>();
+                                links = new HashSet<string>();
                                 break;
                             case State.TitleValue:
                                 title.Append(ch);
@@ -219,14 +222,14 @@ namespace wikipedia_metric
         }
 
         // Formats a key-value pair from the map into a JSON object string, including the title and links
-        private static string FormatPair(KeyValuePair<string, List<string>> pair, bool trailingComma)
+        private static string FormatPair(KeyValuePair<string, HashSet<string>> pair, bool trailingComma)
         {
             var formatted = new StringBuilder();
 
             formatted.AppendLine("	{");
 
             formatted.AppendLine($@"		""title"": ""{pair.Key}"",");
-            formatted.AppendLine($@"		""links"": [{FormatLinks(pair.Value)}]");
+            formatted.AppendLine($@"		""links"": [{FormatLinks(pair.Value.ToList())}]");
 
             formatted.AppendLine(trailingComma ? "	}," : "	}");
 
