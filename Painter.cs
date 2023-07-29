@@ -50,9 +50,9 @@ namespace wikipedia_metric
     internal class Painter
     {
         private static readonly Logger Logger;
-        private readonly int PrintableCanvasSize; // px
+        private readonly int UsableCanvasSize; // px
 
-        // Minimal size of a blob, eg. blob of size 1 will have 10 px
+        // Minimal size of a node, eg. node of size 1 will have 10 px
         private readonly int MinSize; // px
 
         private List<Node> AllNodes;
@@ -70,35 +70,35 @@ namespace wikipedia_metric
             Logger = new Logger(nameof(Painter));
         }
 
-        public Painter(int canvas, int border, int minimalBlobSize)
+        public Painter(int canvas, int border, int minimalNodeSize)
         {
-            PrintableCanvasSize = canvas - 2 * border;
-            MinSize = minimalBlobSize;
+            UsableCanvasSize = canvas - 2 * border;
+            MinSize = minimalNodeSize;
 
             RandomGenerator = new Random();
         }
 
-        // Ensure we can fit all the blobs to the canvas by rescaling them in place
+        // Ensure we can fit all the nodes to the canvas by rescaling them in place
         private List<Node> RescaleNodes(List<Node> nodes)
         {
-            // Calculate the scale so we can multiply sizes of each blob
+            // Calculate the scale so we can multiply sizes of each node
             // so they all can fit on the canvas
             double scalingConstant =
-                PrintableCanvasSize / (nodes.Sum(blob => blob.Radius * 2) + MinSize * nodes.Count);
+                UsableCanvasSize / (nodes.Sum(node => node.Radius * 2) + MinSize * nodes.Count);
 
-            foreach (var blob in nodes)
+            foreach (var node in nodes)
             {
-                blob.Radius *= scalingConstant;
+                node.Radius *= scalingConstant;
                 // We assume some minimal node size when calculating the scaling constant
                 // and sometimes the node has lower size as the minimal size so we clip it
-                if (blob.Radius < MinSize)
-                    blob.Radius = MinSize;
+                if (node.Radius < MinSize)
+                    node.Radius = MinSize;
             }
 
             return nodes;
         }
 
-        // Check if the blob we want to select to draw
+        // Check if the node we want to select to draw
         // conflicts with any other already selected nodes
         private bool CanDraw(Node origin, Node node, List<Node> currentlySelectedToDraw)
         {
@@ -169,7 +169,7 @@ namespace wikipedia_metric
                 // node so we need to change something else
                 while (neighNode.SelectAttempts <= MaxSelectAttempts && progress == null)
                 {
-                    var phi = node.Phi + (Signs[RandomGenerator.Next(0, 2)] *
+                    var phi = node.Phi + (Signs[RandomGenerator.Next(0, Signs.Length)] *
                                           (RandomGenerator.NextDouble() * Math.PI / RotationFactor));
                     var x = node.Coords.X + Math.Sin(phi) * (node.Radius + neighNode.Radius);
                     var y = node.Coords.Y + Math.Cos(phi) * (node.Radius + neighNode.Radius);
@@ -209,7 +209,7 @@ namespace wikipedia_metric
             return currentlySelectedToDraw;
         }
 
-        // Set coordinates for each blob center so no blob intersects and each blob is connected only with its neighbours
+        // Set coordinates for each node center so no node intersects and each node is connected only with its neighbours
         private List<Node> PrepareNodes(List<Node> tree, double rotationFactor = 4, double phi0 = 0, double x0 = 0,
             double y0 = 0)
         {
@@ -246,10 +246,17 @@ namespace wikipedia_metric
                     left = node.Coords.X - node.Radius;
             }
 
-            Logger.Info(top);
-            Logger.Info(right);
-            Logger.Info(bottom);
-            Logger.Info(left);
+            var height = Math.Abs((top - bottom) / 2);
+            var width = Math.Abs((left - right) / 2);
+
+            var centerX = left + width;
+            var centerY = top + height;
+
+            var shiftX = (UsableCanvasSize / 2) - centerX;
+            var shiftY = (UsableCanvasSize / 2) - centerY;
+
+            foreach (var node in nodes)
+                node.Coords = (node.Coords.X + shiftX, node.Coords.Y + shiftY);
 
             return nodes;
         }
@@ -260,23 +267,23 @@ namespace wikipedia_metric
         public void PaintToImage(List<Node> paths, string imgPath)
         {
             // Create a new image with a white background
-            var image = new Bitmap(PrintableCanvasSize, PrintableCanvasSize);
+            var image = new Bitmap(UsableCanvasSize, UsableCanvasSize);
 
             // Get a graphics object from the image
             var graphics = Graphics.FromImage(image);
-            graphics.FillRectangle(new SolidBrush(Color.White), new RectangleF(0, 0, (float)1000, (float)1000));
+            graphics.FillRectangle(new SolidBrush(Color.White), new RectangleF(0, 0, UsableCanvasSize, UsableCanvasSize));
 
             // Set the color of the brush to black
             var brush = new Pen(Color.Black);
 
-            // Draw the blobs on the image
+            // Draw the nodes on the image
             foreach (var node in PrepareNodes(paths))
             {
-                // Create RectangleF object of the blob circle
+                // Create RectangleF object of the node circle
                 var rect = new RectangleF((float)(node.Coords.X - node.Radius),
                     (float)(node.Coords.Y - node.Radius), (float)node.Radius * 2, (float)node.Radius * 2);
 
-                // Draw the blob on the image
+                // Draw the node on the image
                 graphics.DrawString(node.Name, new Font("Calibri", 8), Brushes.Black, rect);
                 graphics.DrawEllipse(brush, rect);
             }
