@@ -147,7 +147,6 @@ namespace wikipedia_metric
             {
                 CalculateInDegrees();
             }
-
             List<string> topNodes = HeapNPick(numberOfClusters);
             // List<string> topNodes = SortNPick(numberOfClusters);
 
@@ -157,7 +156,7 @@ namespace wikipedia_metric
             foreach (string node in topNodes)
             {
                 Cluster newCluster = new(graph, node);
-                this.clusters[node] = newCluster;
+                clusters[node] = newCluster;
                 visited.Add(node);
                 queue.Enqueue(new KeyValuePair<string, Cluster>(node, newCluster));
             }
@@ -187,7 +186,8 @@ namespace wikipedia_metric
                     }
                 }
                 else {
-                    logger.Warning($"Graph does not contain {current.Key}");
+                    missed ++;
+                    // logger.Warning($"Graph does not contain {current.Key}");
                 }
             }
             Console.WriteLine("\n" + counter);

@@ -7,7 +7,11 @@ namespace wikipedia_metric
     /* Class for finding closes distance of two articles */
     public class Search
     {
-        Graph<string> graph = new();
+        readonly Graph graph;
+        public Search(Graph graph)
+        {
+            this.graph = graph;
+        }
         public Search()
         {
             // graph inicialization

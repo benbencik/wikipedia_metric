@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -7,13 +9,13 @@ namespace wikipedia_metric
 {
     public class Graph
     {
-        public Dictionary<string, List<string>> adjacencyList;
+        public Dictionary<string, HashSet<string>> adjacencyList;
         public Dictionary<string, Cluster> cluster;
         readonly Logger logger = new("Graph");
 
         public List<string> nodes;
         
-        public Graph(Dictionary<string, List<string>> article_dictionary)
+        public Graph(Dictionary<string, HashSet<string>> article_dictionary)
         {
             adjacencyList = article_dictionary;
             nodes = new List<string>(adjacencyList.Keys);
@@ -24,7 +26,7 @@ namespace wikipedia_metric
         {
             if (!adjacencyList.ContainsKey(vertex))
             {
-                adjacencyList[vertex] = new List<string>();
+                adjacencyList[vertex] = new HashSet<string>();
             }
         }
         public void AddEdge(string source, string destination)
@@ -42,13 +44,13 @@ namespace wikipedia_metric
             adjacencyList[destination].Add(source);
         }
 
-        public List<string> GetNeighbors(string vertex)
+        public HashSet<string> GetNeighbors(string vertex)
         {
             if (adjacencyList.ContainsKey(vertex))
             {
                 return adjacencyList[vertex];
             }
-            return new List<string>();
+            return new HashSet<string>();
         }
 
         public bool ContainsVertex(string vertex)
@@ -58,18 +60,24 @@ namespace wikipedia_metric
 
         private void ClearNonExistenLinks() {
             logger.Info("Clearing non existent links");
+            int counter = 0;
             foreach (var item in adjacencyList)
             {
-                List<String> new_list = new List<string>();
-                for (int i = 0; i < item.Value.Count; i++)
+                HashSet<String> new_links = new HashSet<string>();
+                foreach (var link in item.Value)
                 {
-                    if (adjacencyList.ContainsKey(item.Value[i]))
+                    if (adjacencyList.ContainsKey(link))
                     {
-                        new_list.Add(item.Value[i]);
+                        new_links.Add(link);
+                    }
+                    else
+                    {
+                        counter++;
                     }
                 }
-                adjacencyList[item.Key] = new_list;
+                adjacencyList[item.Key] = new_links;
             }
+            logger.Info($"Removed {counter} non existent links");
         }
 
 
