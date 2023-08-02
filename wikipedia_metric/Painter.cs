@@ -47,7 +47,7 @@ namespace wikipedia_metric
         }
     }
 
-    internal class Painter
+    public class Painter
     {
         private static readonly Logger Logger;
         private readonly int UsableCanvasSize; // px
@@ -59,8 +59,8 @@ namespace wikipedia_metric
         private readonly HashSet<Node> SelectedToDraw = new();
 
         private readonly Random RandomGenerator;
-        private const int MaxSelectAttempts = 100;
-        private const double TOLERANCE = 0.001;
+        private const int MaxSelectAttempts = 1000;
+        public const double TOLERANCE = 0.001;
         private const double MinNeighbourDistance = 2;
         private readonly int[] Signs = new int[2] { -1, 1 };
         private double RotationFactor;
@@ -70,9 +70,9 @@ namespace wikipedia_metric
             Logger = new Logger(nameof(Painter));
         }
 
-        public Painter(int canvas, int border, int minimalNodeSize)
+        public Painter(int canvasSize, int borderSize, int minimalNodeSize)
         {
-            UsableCanvasSize = canvas - 2 * border;
+            UsableCanvasSize = canvasSize - 2 * borderSize;
             MinSize = minimalNodeSize;
 
             RandomGenerator = new Random();
@@ -141,7 +141,7 @@ namespace wikipedia_metric
         }
 
         // For each neighbour of a given node try selecting non conflicting
-        // coordinates and repeat this process for the neighbour neighbous etc.
+        // coordinates and repeat this process for the neighbour neighbours etc.
         // When no non-conflicting coordinates can be selected, backtrack
         // and try selecting other coordinates for the parent node.
         // Repeat until all nodes have properly selected coordinates or
@@ -209,21 +209,6 @@ namespace wikipedia_metric
             return currentlySelectedToDraw;
         }
 
-        // Set coordinates for each node center so no node intersects and each node is connected only with its neighbours
-        private List<Node> PrepareNodes(List<Node> tree, double rotationFactor = 4, double phi0 = 0, double x0 = 0,
-            double y0 = 0)
-        {
-            RotationFactor = rotationFactor;
-            AllNodes = RescaleNodes(tree);
-
-            // Start the algorithm from a arbitrary node at arbitrary coordinates
-            var startingNode = AllNodes[0];
-            startingNode.SelectCoords((x0, y0), phi0);
-
-            var drawableNodes = PrepareNodesToDraw(startingNode);
-            return FitToCanvas(drawableNodes);
-        }
-
         // Calculate the rectangular boundary that fits exactly all nodes and
         // move the boundary so it all fits into the canvas coordinates
         // (translate the final image so it can be drawn to the canvas)
@@ -261,10 +246,26 @@ namespace wikipedia_metric
             return nodes;
         }
 
+        // Set coordinates for each node center so no node intersects and each node is connected only with its neighbours
+        public List<Node> PrepareNodes(List<Node> tree, double rotationFactor = 1, double phi0 = 0, double x0 = 0,
+            double y0 = 0)
+        {
+            RotationFactor = rotationFactor;
+            // Rescale the tree so it can always fit into the canvas
+            AllNodes = RescaleNodes(tree);
+
+            // Start the algorithm from a arbitrary node at arbitrary coordinates
+            var startingNode = AllNodes[0];
+            startingNode.SelectCoords((x0, y0), phi0);
+
+            var drawableNodes = PrepareNodesToDraw(startingNode);
+            return FitToCanvas(drawableNodes);
+        }
+
         // A function that generates and saves a svg image from the SelectedToDraw array
         // with all the nodes drawn with black color on a white background.
         // This is a temporary solution. Most likely will be replaced by Ben's own implementation.
-        public void PaintToImage(List<Node> paths, string imgPath)
+        public void PaintToImage(List<Node> tree, string imgPath)
         {
             // Create a new image with a white background
             var image = new Bitmap(UsableCanvasSize, UsableCanvasSize);
@@ -277,14 +278,14 @@ namespace wikipedia_metric
             var brush = new Pen(Color.Black);
 
             // Draw the nodes on the image
-            foreach (var node in PrepareNodes(paths))
+            foreach (var node in PrepareNodes(tree))
             {
                 // Create RectangleF object of the node circle
                 var rect = new RectangleF((float)(node.Coords.X - node.Radius),
                     (float)(node.Coords.Y - node.Radius), (float)node.Radius * 2, (float)node.Radius * 2);
 
                 // Draw the node on the image
-                graphics.DrawString(node.Name, new Font("Calibri", 8), Brushes.Black, rect);
+                graphics.DrawString(node.Name, new Font("Calibri", 5), Brushes.Black, rect);
                 graphics.DrawEllipse(brush, rect);
             }
 

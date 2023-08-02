@@ -51,7 +51,7 @@ namespace wikipedia_metric
             foreach (string currentLine in FileManager.GetLines(path))
             {
                 // Detect start and end of a page
-                // We are detecting only `page>` since wikisource dumps are
+                // We are detecting only `page>` since Wikisource dumps are
                 // valid XML files so there is always only one opening and
                 // one corresponding closing tag
                 if (currentLine.Contains(PageTag))
