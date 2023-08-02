@@ -1,5 +1,3 @@
-using NUnit.Framework.Interfaces;
-
 namespace wikipedia_metric.Tests;
 
 public class Tests
