@@ -11,16 +11,16 @@ namespace wikipedia_metric
     {
         public Dictionary<string, HashSet<string>> adjacencyList;
         public Dictionary<string, Cluster> cluster;
-        readonly Logger logger = new("Graph");
-
         public List<string> nodes;
-        public int num_of_edges;
-
+        
+        readonly Logger logger = new("Graph");
+        private readonly Dictionary<string, int> components = new();
+        private int barCounter;
+        private int connectedComponentsCount;
         readonly private string[] prefixes = { 
             ":ru:", "../", "Author:", ":Category:", "w:",
             "Page:", "Wikipedia:", "File:", "Template:",
         };
-
         readonly private string[] suffixes = {
             ".jpg", ".png", ".pdf", ".svg", ".ogg", 
             ".mp3", ".jpeg", ".gif"
@@ -28,11 +28,14 @@ namespace wikipedia_metric
 
         public Graph(Dictionary<string, HashSet<string>> article_dictionary)
         {
-            num_of_edges = 0;
             adjacencyList = article_dictionary;
             nodes = new List<string>(adjacencyList.Keys);
-            logger.Info($"Formating links");
-            TrimInvalidLinks();
+            logger.Info($"Graph successfully loaded");
+            
+            logger.Info($"Analzying component...");
+            connectedComponentsCount = 0;
+            CountConnectedComponents();
+            // TrimInvalidLinks();
             // ClearNonExistenLinks();
         }
 
@@ -54,7 +57,6 @@ namespace wikipedia_metric
                 AddVertex(destination);
             }
 
-            num_of_edges++;
             adjacencyList[source].Add(destination);
             adjacencyList[destination].Add(source);
         }
@@ -79,7 +81,6 @@ namespace wikipedia_metric
             // itterate through all pages
             foreach (var links in adjacencyList)
             {
-                num_of_edges += links.Value.Count;
                 HashSet<string> new_links = new HashSet<string>();
                 // itterate through all links in page
                 foreach (var item in links.Value)
@@ -116,7 +117,7 @@ namespace wikipedia_metric
             int counter = 0;
             foreach (var item in adjacencyList)
             {
-                HashSet<String> new_links = new HashSet<string>();
+                HashSet<String> new_links = new();
                 foreach (var link in item.Value)
                 {
                     if (adjacencyList.ContainsKey(link))
@@ -133,10 +134,54 @@ namespace wikipedia_metric
             logger.Info($"Removed {counter} non existent links");
         }
 
+        public int CountConnectedComponents()
+        {
+            if (nodes.Count == 0) return 0; // If there are no nodes, there are no connected components.
+            barCounter = 0;
+            foreach (string node in nodes)
+            {
+                if (!components.ContainsKey(node))
+                {
+                    connectedComponentsCount++;
+                    DFS(node);
+                }
+            }
+
+            return connectedComponentsCount;
+        }
+
+        private void DFS(string currentNode)
+        {
+            if (components.ContainsKey(currentNode)) return;
+
+            components[currentNode] = connectedComponentsCount;
+            barCounter++;
+            if (barCounter % 100 == 0)
+            {
+                logger.LoadingBar(nodes.Count, barCounter);
+            }
+            foreach (var neighbor in GetNeighbors(currentNode))
+            {
+                if (ContainsVertex(neighbor))
+                {
+                    DFS(neighbor);
+                }
+            }
+        }
+
+
         public void PrintGraphStats()
         {
-            string[] columns = {"#Nodes", "#Edges"};
-            string[,] values = {{nodes.Count.ToString(), num_of_edges.ToString()}};
+            int sum = 0;
+            foreach (var item in adjacencyList)
+            {
+                sum += item.Value.Count;
+            }
+            double average = (double)sum / (double)adjacencyList.Count;
+            string averageDeg = average.ToString("#.0000");
+            
+            string[] columns = {"#Nodes", "#Edges", "Average degree", "#Components"};
+            string[,] values = {{nodes.Count.ToString(), sum.ToString(), averageDeg, connectedComponentsCount.ToString()}};
             AsciiTablePrinter.PrintTable(columns, values);
         }
 
@@ -197,19 +242,23 @@ namespace wikipedia_metric
             return path;
         }
 
-        public List<string> NaiveFindPath(string start, string end)
+        public List<string> NaiveFindPath(string source, string target)
         {
+            if (components[source] != components[target]){
+                logger.Warning("Nodes are not in the same component...");
+                return new List<string>();
+            }
             // implementation of uninformed search algorithm
             Dictionary<string, int> distances = new();
             Dictionary<string, string> previous = new();
             Queue<string> queue = new();
-            queue.Enqueue(start);
-            distances.Add(start, 0);
+            queue.Enqueue(source);
+            distances.Add(source, 0);
             
             while (queue.Count > 0)
             {
                 string current = queue.Dequeue();
-                if (current == end) { break; }
+                if (current == target) { break; }
 
                 foreach (string neighbor in GetNeighbors(current))
                 {
@@ -221,7 +270,14 @@ namespace wikipedia_metric
                     }
                 }
             }
-            return ReconstructPath(end, previous);
+            return ReconstructPath(target, previous);
+        }
+
+        public List<string> InformedSeach() {
+            // implementation of informed search algorithm
+            // uses heap to expand nodes with biggest degree
+            return new();
+            
         }
     }
 
