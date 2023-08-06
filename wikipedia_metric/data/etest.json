@@ -1,0 +1,110 @@
+[
+    {
+        "title": "green apple",
+        "links": ["ripe banana", "carrot juice", "fresh date", "sweet mango", "orange peel", "watermelon slice"]
+    },
+    {
+        "title": "ripe banana",
+        "links": ["carrot juice", "giant elephant", "juicy grape", "watermelon slice", "zebra stripes"]
+    },
+    {
+        "title": "carrot juice",
+        "links": ["green apple", "tasty fig", "honey syrup", "zesty lemonade"]
+    },
+    {
+        "title": "fresh date",
+        "links": ["giant elephant", "sweet mango", "orange peel", "juicy peach"]
+    },
+    {
+        "title": "sweet mango",
+        "links": ["juicy peach", "ripe nectarine", "orange peel", "healthy quinoa"]
+    },
+    {
+        "title": "juicy grape",
+        "links": ["green apple", "honey syrup", "yummy ice cream", "jelly jar", "kale salad"]
+    },
+    {
+        "title": "orange peel",
+        "links": ["sweet mango", "ripe nectarine", "juicy peach", "quince jam", "raspberry tart"]
+    },
+    {
+        "title": "watermelon slice",
+        "links": ["yummy ice cream", "jelly jar", "kale salad", "lemon zest", "mango smoothie"]
+    },
+    {
+        "title": "honey syrup",
+        "links": ["jelly jar", "kale salad", "zesty lemonade", "mango smoothie"]
+    },
+    {
+        "title": "zesty lemonade",
+        "links": ["mango smoothie", "nectarine sorbet", "orange cream", "peach tea"]
+    },
+    {
+        "title": "jelly jar",
+        "links": ["kale salad", "lemon zest", "mango smoothie", "nectarine sorbet"]
+    },
+    {
+        "title": "kale salad",
+        "links": ["honey syrup", "zesty lemonade", "mango smoothie", "nectarine sorbet"]
+    },
+    {
+        "title": "lemon zest",
+        "links": ["mango smoothie", "nectarine sorbet", "orange cream", "peach tea"]
+    },
+    {
+        "title": "mango smoothie",
+        "links": ["nectarine sorbet", "orange cream", "peach tea", "quince jam"]
+    },
+    {
+        "title": "nectarine sorbet",
+        "links": ["orange cream", "peach tea", "quince jam", "raspberry tart"]
+    },
+    {
+        "title": "orange cream",
+        "links": ["peach tea", "quince jam", "raspberry tart", "strawberry parfait"]
+    },
+    {
+        "title": "peach tea",
+        "links": ["quince jam", "raspberry tart", "strawberry parfait", "tropical yogurt"]
+    },
+    {
+        "title": "quince jam",
+        "links": ["strawberry parfait", "tropical yogurt", "umbrella stand", "violin case"]
+    },
+    {
+        "title": "raspberry tart",
+        "links": ["strawberry parfait", "tropical yogurt", "umbrella stand", "violin case"]
+    },
+    {
+        "title": "strawberry parfait",
+        "links": ["tropical yogurt", "umbrella stand", "violin case", "watermelon slice"]
+    },
+    {
+        "title": "tropical yogurt",
+        "links": ["umbrella stand", "violin case", "watermelon slice", "xylophone music"]
+    },
+    {
+        "title": "umbrella stand",
+        "links": ["violin case", "watermelon slice", "xylophone music", "yogurt bowl", "zebra stripes"]
+    },
+    {
+        "title": "violin case",
+        "links": ["watermelon slice", "xylophone music", "yogurt bowl", "zebra stripes"]
+    },
+    {
+        "title": "watermelon slice",
+        "links": ["xylophone music", "yogurt bowl", "zebra stripes"]
+    },
+    {
+        "title": "xylophone music",
+        "links": ["yogurt bowl", "zebra stripes"]
+    },
+    {
+        "title": "yogurt bowl",
+        "links": ["zebra stripes"]
+    },
+    {
+        "title": "zebra stripes",
+        "links": ["umbrella stand"]
+    }
+]

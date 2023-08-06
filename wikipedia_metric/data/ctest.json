@@ -1,0 +1,106 @@
+[
+    {
+      "title": "apple",
+      "links": ["banana", "carrot", "date"]
+    },
+    {
+      "title": "banana",
+      "links": ["carrot", "elephant"]
+    },
+    {
+      "title": "carrot",
+      "links": ["apple", "fig"]
+    },
+    {
+      "title": "date",
+      "links": ["elephant"]
+    },
+    {
+      "title": "elephant",
+      "links": ["fig", "grape"]
+    },
+    {
+      "title": "fig",
+      "links": ["grape"]
+    },
+    {
+      "title": "grape",
+      "links": ["apple", "honey"]
+    },
+    {
+      "title": "honey",
+      "links": ["icecream"]
+    },
+    {
+      "title": "icecream",
+      "links": ["jam"]
+    },
+    {
+      "title": "jam",
+      "links": ["kale"]
+    },
+    {
+      "title": "kale",
+      "links": ["honey", "lemon"]
+    },
+    {
+      "title": "lemon",
+      "links": ["mango"]
+    },
+    {
+      "title": "mango",
+      "links": ["nectarine"]
+    },
+    {
+      "title": "nectarine",
+      "links": ["mango", "orange"]
+    },
+    {
+      "title": "orange",
+      "links": ["peach"]
+    },
+    {
+      "title": "peach",
+      "links": ["orange", "quince", "raspberry"]
+    },
+    {
+      "title": "quince",
+      "links": ["strawberry"]
+    },
+    {
+      "title": "raspberry",
+      "links": ["tomato"]
+    },
+    {
+      "title": "strawberry",
+      "links": ["quince"]
+    },
+    {
+      "title": "tomato",
+      "links": ["raspberry"]
+    },
+    {
+      "title": "umbrella",
+      "links": ["violin", "watermelon"]
+    },
+    {
+      "title": "violin",
+      "links": ["xylophone", "yogurt"]
+    },
+    {
+      "title": "watermelon",
+      "links": ["yogurt"]
+    },
+    {
+      "title": "xylophone",
+      "links": ["violin"]
+    },
+    {
+      "title": "yogurt",
+      "links": ["zebra"]
+    },
+    {
+      "title": "zebra",
+      "links": ["umbrella"]
+    }
+  ]

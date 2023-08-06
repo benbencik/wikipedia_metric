@@ -1,0 +1,82 @@
+[
+    {
+      "title": "A",
+      "links": ["B", "C", "D"]
+    },
+    {
+      "title": "B",
+      "links": ["C", "E"]
+    },
+    {
+      "title": "C",
+      "links": ["A", "F"]
+    },
+    {
+      "title": "D",
+      "links": ["E"]
+    },
+    {
+      "title": "E",
+      "links": ["F", "G"]
+    },
+    {
+      "title": "F",
+      "links": ["G"]
+    },
+    {
+      "title": "G",
+      "links": ["A", "H"]
+    },
+    {
+      "title": "H",
+      "links": ["I"]
+    },
+    {
+      "title": "I",
+      "links": ["J"]
+    },
+    {
+      "title": "J",
+      "links": ["K"]
+    },
+    {
+      "title": "K",
+      "links": ["H", "L"]
+    },
+    {
+      "title": "L",
+      "links": ["M"]
+    },
+    {
+      "title": "M",
+      "links": ["N"]
+    },
+    {
+      "title": "N",
+      "links": ["M", "O"]
+    },
+    {
+      "title": "O",
+      "links": ["P"]
+    },
+    {
+      "title": "P",
+      "links": ["O", "Q", "R"]
+    },
+    {
+      "title": "Q",
+      "links": ["S"]
+    },
+    {
+      "title": "R",
+      "links": ["T"]
+    },
+    {
+      "title": "S",
+      "links": ["Q"]
+    },
+    {
+      "title": "T",
+      "links": ["R"]
+    }
+  ]

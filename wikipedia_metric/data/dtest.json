@@ -1,0 +1,106 @@
+[
+    {
+        "title": "apple",
+        "links": ["banana", "carrot", "date", "mango", "orange", "watermelon"]
+    },
+    {
+        "title": "banana",
+        "links": ["carrot", "elephant", "grape", "watermelon", "zebra"]
+    },
+    {
+        "title": "carrot",
+        "links": ["apple", "fig", "honey", "lemon"]
+    },
+    {
+        "title": "date",
+        "links": ["elephant", "mango", "orange", "peach"]
+    },
+    {
+        "title": "elephant",
+        "links": ["fig", "grape", "honey", "icecream"]
+    },
+    {
+        "title": "fig",
+        "links": ["grape", "jam", "kale", "lemon"]
+    },
+    {
+        "title": "grape",
+        "links": ["apple", "honey", "icecream", "jelly", "kale"]
+    },
+    {
+        "title": "honey",
+        "links": ["icecream", "jam", "kale", "lemon"]
+    },
+    {
+        "title": "icecream",
+        "links": ["jam", "kale", "lemon", "mango"]
+    },
+    {
+        "title": "jam",
+        "links": ["kale", "lemon", "mango", "nectarine"]
+    },
+    {
+        "title": "kale",
+        "links": ["honey", "lemon", "mango", "nectarine"]
+    },
+    {
+        "title": "lemon",
+        "links": ["mango", "nectarine", "orange", "peach"]
+    },
+    {
+        "title": "mango",
+        "links": ["nectarine", "orange", "peach", "quince"]
+    },
+    {
+        "title": "nectarine",
+        "links": ["mango", "orange", "peach", "quince"]
+    },
+    {
+        "title": "orange",
+        "links": ["peach", "quince", "raspberry", "strawberry"]
+    },
+    {
+        "title": "peach",
+        "links": ["orange", "quince", "raspberry", "strawberry"]
+    },
+    {
+        "title": "quince",
+        "links": ["strawberry", "tomato", "umbrella", "violin"]
+    },
+    {
+        "title": "raspberry",
+        "links": ["tomato", "umbrella", "violin", "watermelon"]
+    },
+    {
+        "title": "strawberry",
+        "links": ["quince", "tomato", "umbrella", "violin", "xylophone"]
+    },
+    {
+        "title": "tomato",
+        "links": ["raspberry", "umbrella", "violin", "watermelon", "xylophone"]
+    },
+    {
+        "title": "umbrella",
+        "links": ["violin", "watermelon", "xylophone", "yogurt", "zebra"]
+    },
+    {
+        "title": "violin",
+        "links": ["xylophone", "yogurt", "zebra"]
+    },
+    {
+        "title": "watermelon",
+        "links": ["yogurt", "zebra"]
+    },
+    {
+        "title": "xylophone",
+        "links": ["violin", "yogurt", "zebra"]
+    },
+    {
+        "title": "yogurt",
+        "links": ["zebra"]
+    },
+    {
+        "title": "zebra",
+        "links": ["umbrella"]
+    }
+]

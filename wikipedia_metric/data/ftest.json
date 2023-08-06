@@ -1,0 +1,202 @@
+[
+    {
+        "title": "Artificial intelligence",
+        "links": ["Machine learning", "Data science", "Neural networks"]
+    },
+    {
+        "title": "Machine learning",
+        "links": ["Data science", "Deep learning", "Reinforcement learning"]
+    },
+    {
+        "title": "Data science",
+        "links": ["Artificial intelligence", "Machine learning", "Big data"]
+    },
+    {
+        "title": "Neural networks",
+        "links": ["Artificial intelligence", "Deep learning", "Natural language processing"]
+    },
+    {
+        "title": "Deep learning",
+        "links": ["Machine learning", "Neural networks", "Computer vision"]
+    },
+    {
+        "title": "Reinforcement learning",
+        "links": ["Machine learning", "Game theory", "Robotics"]
+    },
+    {
+        "title": "Big data",
+        "links": ["Data science", "Data analytics", "Cloud computing"]
+    },
+    {
+        "title": "Natural language processing",
+        "links": ["Artificial intelligence", "Machine learning", "Linguistics"]
+    },
+    {
+        "title": "Computer vision",
+        "links": ["Artificial intelligence", "Image processing", "Robotics"]
+    },
+    {
+        "title": "Game theory",
+        "links": ["Economics", "Decision making", "Probability theory"]
+    },
+    {
+        "title": "Robotics",
+        "links": ["Artificial intelligence", "Mechanical engineering", "Computer vision"]
+    },
+    {
+        "title": "Data analytics",
+        "links": ["Data science", "Business intelligence", "Data visualization"]
+    },
+    {
+        "title": "Cloud computing",
+        "links": ["Big data", "Distributed systems", "Virtualization"]
+    },
+    {
+        "title": "Linguistics",
+        "links": ["Language acquisition", "Syntax", "Semantics"]
+    },
+    {
+        "title": "Image processing",
+        "links": ["Computer vision", "Digital signal processing", "Pattern recognition"]
+    },
+    {
+        "title": "Economics",
+        "links": ["Game theory", "Microeconomics", "Macroeconomics"]
+    },
+    {
+        "title": "Decision making",
+        "links": ["Game theory", "Cognitive psychology", "Rational choice theory"]
+    },
+    {
+        "title": "Probability theory",
+        "links": ["Statistics", "Stochastic processes", "Random variables"]
+    },
+    {
+        "title": "Mechanical engineering",
+        "links": ["Robotics", "Thermodynamics", "Fluid mechanics"]
+    },
+    {
+        "title": "Data visualization",
+        "links": ["Data analytics", "Information design", "Infographics"]
+    },
+    {
+        "title": "Distributed systems",
+        "links": ["Cloud computing", "Network protocols", "Fault tolerance"]
+    },
+    {
+        "title": "Virtualization",
+        "links": ["Cloud computing", "Operating systems", "Virtual machines"]
+    },
+    {
+        "title": "Language acquisition",
+        "links": ["Linguistics", "Psycholinguistics", "Bilingualism"]
+    },
+    {
+        "title": "Syntax",
+        "links": ["Linguistics", "Generative grammar", "Syntactic structures"]
+    },
+    {
+        "title": "Semantics",
+        "links": ["Linguistics", "Lexical semantics", "Pragmatics"]
+    },
+    {
+        "title": "Digital signal processing",
+        "links": ["Image processing", "Audio processing", "Signal analysis"]
+    },
+    {
+        "title": "Pattern recognition",
+        "links": ["Image processing", "Machine learning", "Artificial intelligence"]
+    },
+    {
+        "title": "Microeconomics",
+        "links": ["Economics", "Consumer behavior", "Market structure"]
+    },
+    {
+        "title": "Macroeconomics",
+        "links": ["Economics", "Fiscal policy", "Monetary policy"]
+    },
+    {
+        "title": "Cognitive psychology",
+        "links": ["Decision making", "Perception", "Memory"]
+    },
+    {
+        "title": "Rational choice theory",
+        "links": ["Decision making", "Game theory", "Economics"]
+    },
+    {
+        "title": "Statistics",
+        "links": ["Probability theory", "Data analysis", "Sampling methods"]
+    },
+    {
+        "title": "Stochastic processes",
+        "links": ["Probability theory", "Random variables", "Markov chains"]
+    },
+    {
+        "title": "Random variables",
+        "links": ["Probability theory", "Stochastic processes", "Probability distributions"]
+    },
+    {
+        "title": "Thermodynamics",
+        "links": ["Mechanical engineering", "Heat transfer", "Thermal systems"]
+    },
+    {
+        "title": "Fluid mechanics",
+        "links": ["Mechanical engineering", "Hydrodynamics", "Aerodynamics"]
+    },
+    {
+        "title": "Business intelligence",
+        "links": ["Data analytics", "Data warehousing", "Business performance"]
+    },
+    {
+        "title": "Information design",
+        "links": ["Data visualization", "User experience", "Visual communication"]
+    },
+    {
+        "title": "Infographics",
+        "links": ["Data visualization", "Data presentation", "Information graphics"]
+    },
+    {
+        "title": "Network protocols",
+        "links": ["Distributed systems", "Internet protocols", "Data transmission"]
+    },
+    {
+        "title": "Fault tolerance",
+        "links": ["Distributed systems", "Reliability engineering", "Error recovery"]
+    },
+    {
+        "title": "Operating systems",
+        "links": ["Virtualization", "System programming", "Kernel design"]
+    },
+    {
+        "title": "Virtual machines",
+        "links": ["Virtualization", "System virtualization", "Emulation"]
+    },
+    {
+        "title": "Psycholinguistics",
+        "links": ["Language acquisition", "Cognitive psychology", "Language processing"]
+    },
+    {
+        "title": "Bilingualism",
+        "links": ["Language acquisition", "Multilingualism", "Code-switching"]
+    },
+    {
+        "title": "Generative grammar",
+        "links": ["Syntax", "Transformational grammar", "Phrase structure rules"]
+    },
+    {
+        "title": "Syntactic structures",
+        "links": ["Syntax", "Generative grammar", "Sentence analysis"]
+    },
+    {
+        "title": "Lexical semantics",
+        "links": ["Semantics", "Word meaning", "Lexical relations"]
+    },
+    {
+        "title": "Pragmatics",
+        "links": ["Semantics", "Language use", "Speech acts"]
+    },
+    {
+        "title": "Audio processing",
+        "links": ["Digital signal processing", "Acoustic modeling", "Speech recognition"]
+    }
+]
