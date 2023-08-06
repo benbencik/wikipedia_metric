@@ -2,19 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-// System.CommandLine.NamingConventionBinder;
-using System.CommandLine;
-using System.CommandLine.Invocation;
-
 namespace wikipedia_metric
 {
     internal static class Program
     {
         private static void Main(string[] args)
         {
+
             bool interactive = true;
             // bool verbose = false;
-            // bool stoptime = false;
+            // bool benchmark = false;
             
             if (interactive) {
                 GraphSearchCLI cli = new();
@@ -31,13 +28,13 @@ namespace wikipedia_metric
                             cli.SearchForArticles();
                             break;
                         case GraphSearchCLI.Actions.PrintGraphStats:
-                            Console.WriteLine("Printing graph stats...");
+                            cli.PrintGraphStats();
                             break;
                         case GraphSearchCLI.Actions.FindPathBetweenTwoArticles:
-                            Console.WriteLine("Finding path between two articles...");
+                            cli.SearchForPathBetweenTwoArticles();
                             break;
                         case GraphSearchCLI.Actions.ClusterTheGraph:
-                            Console.WriteLine("Clustering the graph...");
+                            cli.ClusterTheGraph();
                             break;
                         case GraphSearchCLI.Actions.ExitTheApplication:
                             Console.WriteLine("Exiting the application...");
@@ -50,7 +47,7 @@ namespace wikipedia_metric
 
             }
             else {
-                Dictionary<string, HashSet<string>> map = JsonManager.FromFile("data/large-wiki.json");
+                Dictionary<string, HashSet<string>> map = JsonManager.FromFile("data/g_multiword_bigger.json");
                 var graph = new Graph(map);
 
             }
