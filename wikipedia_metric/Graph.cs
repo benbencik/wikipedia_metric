@@ -14,14 +14,25 @@ namespace wikipedia_metric
         readonly Logger logger = new("Graph");
 
         public List<string> nodes;
+        public int num_of_edges;
 
-        private string[] trimPatterns = {"/", ":ru:", "../", "Author:", ":Category:"};
-        
+        readonly private string[] prefixes = { 
+            ":ru:", "../", "Author:", ":Category:", "w:",
+            "Page:", "Wikipedia:", "File:", "Template:",
+        };
+
+        readonly private string[] suffixes = {
+            ".jpg", ".png", ".pdf", ".svg", ".ogg", 
+            ".mp3", ".jpeg", ".gif"
+        };
+
         public Graph(Dictionary<string, HashSet<string>> article_dictionary)
         {
+            num_of_edges = 0;
             adjacencyList = article_dictionary;
             nodes = new List<string>(adjacencyList.Keys);
-            TrimPatterns();
+            logger.Info($"Formating links");
+            TrimInvalidLinks();
             // ClearNonExistenLinks();
         }
 
@@ -43,6 +54,7 @@ namespace wikipedia_metric
                 AddVertex(destination);
             }
 
+            num_of_edges++;
             adjacencyList[source].Add(destination);
             adjacencyList[destination].Add(source);
         }
@@ -61,36 +73,45 @@ namespace wikipedia_metric
             return adjacencyList.ContainsKey(vertex);
         }
 
-        private void TrimPatterns() {
-            foreach (var link in adjacencyList)
+
+        private void TrimInvalidLinks()
+        {
+            // itterate through all pages
+            foreach (var links in adjacencyList)
             {
-                foreach (var item in link.Value)
+                num_of_edges += links.Value.Count;
+                HashSet<string> new_links = new HashSet<string>();
+                // itterate through all links in page
+                foreach (var item in links.Value)
                 {
-                    if (item.Contains("Wikipedia:"))
+                    string trimmed = item;
+                    // itterate through trimming patterns
+                    foreach (var pattern in prefixes)
                     {
-                        link.Value.Remove(item);
+                        if (pattern.Length <= trimmed.Length) {
+                            bool patternFound = true;
+                            for (int i = 0; i < pattern.Length-1; i++)
+                            {
+                                if (trimmed[i] != pattern[i]) {
+                                    patternFound = false;
+                                    break;
+                                }
+                            }
+                            // if pattern is found the substring not including the pattern
+                            if (patternFound) {
+                                trimmed = trimmed.Substring(pattern.Length, trimmed.Length - pattern.Length);
+                            }
+                        }
                     }
+                    new_links.Add(trimmed);
                 }
+                adjacencyList[links.Key] = new_links;
             }
         }
 
-        private void Trimlinks() {
-            foreach (var link in adjacencyList)
-            {
-                foreach (var item in link.Value)
-                {
-                    foreach (var pattern in trimPatterns)
-                    {
-                        if (item.Contains(pattern))
-                        {
-                            link.Value.Remove(item);
-                        }
-                    }
-                }
-            }   
-        }
-
-        private void ClearNonExistenLinks() {
+        private void ClearNonExistenLinks()
+        {
+            // clear jpg, png, pdf etc
             logger.Info("Clearing non existent links");
             int counter = 0;
             foreach (var item in adjacencyList)
@@ -112,8 +133,15 @@ namespace wikipedia_metric
             logger.Info($"Removed {counter} non existent links");
         }
 
+        public void PrintGraphStats()
+        {
+            string[] columns = {"#Nodes", "#Edges"};
+            string[,] values = {{nodes.Count.ToString(), num_of_edges.ToString()}};
+            AsciiTablePrinter.PrintTable(columns, values);
+        }
 
-        public void SearchArticles(string searchQuery)
+
+        public IEnumerable<string> SearchArticles(string searchQuery)
         {
             string[] searchTerms = searchQuery.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             List<string> regexPatterns = new();
@@ -124,16 +152,12 @@ namespace wikipedia_metric
                 string processedTerm = searchTerm;
                 bool startWith = processedTerm.StartsWith("^");
                 bool endWith = processedTerm.EndsWith("$");
-                bool synonym = processedTerm.StartsWith("~");
 
                 if (startWith)
                     processedTerm = processedTerm.TrimStart('^');
 
                 if (endWith)
                     processedTerm = processedTerm.TrimEnd('$');
-
-                if (synonym)
-                    processedTerm = processedTerm.TrimStart('~');
 
                 // Escape special characters in the search term
                 string regexPattern = @"(?i)\b";
@@ -156,14 +180,9 @@ namespace wikipedia_metric
             string combinedRegexPattern = string.Join(".*", regexPatterns);
 
             var searchResults = nodes.Where(article => Regex.IsMatch(article, combinedRegexPattern));
-
-            Console.WriteLine($"Search Results for '{searchQuery}':");
-            foreach (var result in searchResults)
-            {
-                Console.WriteLine(result);
-            }
+            return searchResults;
         }
 
     }
-    
+
 }
