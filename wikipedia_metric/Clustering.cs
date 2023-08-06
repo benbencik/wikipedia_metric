@@ -36,11 +36,12 @@ namespace wikipedia_metric
             return average / ClusterMembers.Count;
         }
 
-        public string[] GetStats() {
-            string[] stats = new string[3];
+        public string[] GetStats(Dictionary<string, int> inDegree) {
+            string[] stats = new string[4];
             stats[0] = ClusterCenter;
             stats[1] = ClusterMembers.Count.ToString();
-            stats[2] = "nic zatial";
+            stats[2] = inDegree[ClusterCenter].ToString();
+            stats[3] = "nic zatial";
             return stats;
         } 
 
@@ -190,58 +191,20 @@ namespace wikipedia_metric
                     // logger.Warning($"Graph does not contain {current.Key}");
                 }
             }
-            Console.WriteLine("\n" + counter);
-            Console.WriteLine("\n" + missed);
         }
-
-        // private string FindNearestCluster(List<string> clusterNodes, string node) 
-        // {
-        //     // use BFS to find closes clustering node
-        //     // I am cuttting the number of maximum itterations to reduce performance
-        //     Queue<string> queue = new();
-        //     queue.Enqueue(node);
-        //     int counter = 0;
-
-        //     while (queue.Count > 0 && counter > search_limit)
-        //     {
-        //         counter++;
-        //         string currentNode = queue.Dequeue();
-        //         if (clusterNodes.Contains(currentNode))
-        //         {
-        //             return currentNode;
-        //         }
-        //         else if (graph.adjacencyList.ContainsKey(currentNode))
-        //         {
-        //             foreach (string neighbor in graph.adjacencyList[currentNode])
-        //             {
-        //                 queue.Enqueue(neighbor);
-        //             }
-        //         }
-        //     }
-        //     return null;
-        // }
-
-        // public Dictionary<string, List<string>> ClusterByKMeans(int numberOfClusters)
-        // {
-        //     Console.WriteLine("Clustering by K-means");
-        //     KMeansCluster kMeansCluster = new KMeansCluster(numberOfClusters, graph.nodes, graph.inDegree);
-        //     Dictionary<string, List<string>> clusters = kMeansCluster.ClusterNodes();
-        //     // PrintClusters(clusters);
-        //     return clusters;
-        // }
-
 
         private void PrintClusters()
         {
-            string[] columnNames = { "Cluster Center", "Number of Members", "Average Number of Links" };
-            string[,] table = new string[clusters.Count, 3];
+            string[] columnNames = { "Cluster Center", "Number of Members", "Degree of Center", "Average Number of Links" };
+            string[,] table = new string[clusters.Count, 4];
             int counter = 0;
             foreach (Cluster cluster in clusters.Values)
             {
-                string[] stats = cluster.GetStats();
+                string[] stats = cluster.GetStats(inDegree);
                 table[counter, 0] = stats[0];
                 table[counter, 1] = stats[1];
                 table[counter, 2] = stats[2];
+                table[counter, 3] = stats[3];
                 counter++;
             }
             AsciiTablePrinter.PrintTable(columnNames, table);    
@@ -266,6 +229,5 @@ namespace wikipedia_metric
 
             return sumSquaredDistances;
         }
-
     }
 }
