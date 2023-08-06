@@ -5,11 +5,11 @@
     },
     {
         "title": "ripe banana",
-        "links": ["carrot juice", "giant elephant", "juicy grape", "watermelon slice", "zebra stripes"]
+        "links": ["giant elephant", "juicy grape", "watermelon slice", "zebra stripes"]
     },
     {
         "title": "carrot juice",
-        "links": ["green apple", "tasty fig", "honey syrup", "zesty lemonade"]
+        "links": ["tasty fig", "honey syrup", "zesty lemonade"]
     },
     {
         "title": "fresh date",
@@ -21,11 +21,11 @@
     },
     {
         "title": "juicy grape",
-        "links": ["green apple", "honey syrup", "yummy ice cream", "jelly jar", "kale salad"]
+        "links": ["honey syrup", "yummy ice cream", "jelly jar", "kale salad"]
     },
     {
         "title": "orange peel",
-        "links": ["sweet mango", "ripe nectarine", "juicy peach", "quince jam", "raspberry tart"]
+        "links": ["ripe nectarine", "juicy peach", "quince jam", "raspberry tart"]
     },
     {
         "title": "watermelon slice",
@@ -45,7 +45,7 @@
     },
     {
         "title": "kale salad",
-        "links": ["honey syrup", "zesty lemonade", "mango smoothie", "nectarine sorbet"]
+        "links": ["zesty lemonade", "mango smoothie", "nectarine sorbet"]
     },
     {
         "title": "lemon zest",
@@ -85,23 +85,19 @@
     },
     {
         "title": "umbrella stand",
-        "links": ["violin case", "watermelon slice", "xylophone music", "yogurt bowl", "zebra stripes"]
+        "links": ["violin case", "watermelon slice", "xylophone music", "yogurt bowl"]
     },
     {
         "title": "violin case",
-        "links": ["watermelon slice", "xylophone music", "yogurt bowl", "zebra stripes"]
-    },
-    {
-        "title": "watermelon slice",
-        "links": ["xylophone music", "yogurt bowl", "zebra stripes"]
+        "links": ["watermelon slice", "xylophone music", "yogurt bowl"]
     },
     {
         "title": "xylophone music",
-        "links": ["yogurt bowl", "zebra stripes"]
+        "links": ["yogurt bowl"]
     },
     {
         "title": "yogurt bowl",
-        "links": ["zebra stripes"]
+        "links": []
     },
     {
         "title": "zebra stripes",

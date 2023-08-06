@@ -1,0 +1,18 @@
+[
+    {
+        "title": "A",
+        "links": ["B"]
+    },
+    {
+        "title": "B",
+        "links": ["A"]
+    },
+    {
+        "title": "C",
+        "links": ["D"]
+    },
+    {
+        "title": "D",
+        "links": ["C"]
+    }
+]

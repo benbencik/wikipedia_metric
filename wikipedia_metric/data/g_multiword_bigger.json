@@ -1,0 +1,134 @@
+[
+    {
+        "title": "Artificial intelligence",
+        "links": ["Machine learning", "Data science", "Neural networks"]
+    },
+    {
+        "title": "Machine learning",
+        "links": ["Data science", "Deep learning", "Reinforcement learning"]
+    },
+    {
+        "title": "Data science",
+        "links": ["Artificial intelligence", "Big data"]
+    },
+    {
+        "title": "Neural networks",
+        "links": ["Deep learning", "Natural language processing"]
+    },
+    {
+        "title": "Deep learning",
+        "links": ["Computer vision"]
+    },
+    {
+        "title": "Reinforcement learning",
+        "links": ["Game theory", "Robotics"]
+    },
+    {
+        "title": "Big data",
+        "links": ["Data analytics", "Cloud computing"]
+    },
+    {
+        "title": "Natural language processing",
+        "links": ["Linguistics"]
+    },
+    {
+        "title": "Computer vision",
+        "links": ["Image processing", "Robotics"]
+    },
+    {
+        "title": "Game theory",
+        "links": ["Economics", "Decision making", "Probability theory"]
+    },
+    {
+        "title": "Robotics",
+        "links": ["Mechanical engineering"]
+    },
+    {
+        "title": "Data analytics",
+        "links": ["Business intelligence", "Data visualization"]
+    },
+    {
+        "title": "Cloud computing",
+        "links": ["Distributed systems", "Virtualization"]
+    },
+    {
+        "title": "Linguistics",
+        "links": ["Psycholinguistics"]
+    },
+    {
+        "title": "Image processing",
+        "links": ["Audio processing", "Signal analysis"]
+    },
+    {
+        "title": "Economics",
+        "links": ["Microeconomics", "Macroeconomics"]
+    },
+    {
+        "title": "Decision making",
+        "links": ["Cognitive psychology", "Rational choice theory"]
+    },
+    {
+        "title": "Probability theory",
+        "links": ["Statistics", "Stochastic processes", "Random variables"]
+    },
+    {
+        "title": "Mechanical engineering",
+        "links": ["Thermodynamics", "Fluid mechanics"]
+    },
+    {
+        "title": "Data visualization",
+        "links": ["Information design", "Infographics"]
+    },
+    {
+        "title": "Distributed systems",
+        "links": ["Network protocols", "Fault tolerance"]
+    },
+    {
+        "title": "Virtualization",
+        "links": ["Operating systems", "Virtual machines"]
+    },
+    {
+        "title": "Psycholinguistics",
+        "links": ["Bilingualism"]
+    },
+    {
+        "title": "Generative grammar",
+        "links": ["Transformational grammar", "Phrase structure rules"]
+    },
+    {
+        "title": "Syntactic structures",
+        "links": ["Sentence analysis"]
+    },
+    {
+        "title": "Lexical semantics",
+        "links": ["Word meaning", "Lexical relations"]
+    },
+    {
+        "title": "Pragmatics",
+        "links": ["Language use", "Speech acts"]
+    },
+    {
+        "title": "Audio processing",
+        "links": ["Acoustic modeling", "Speech recognition"]
+    },
+    {
+        "title": "Signal analysis",
+        "links": ["Signal processing", "Time-frequency analysis"]
+    },
+    {
+        "title": "Network protocols",
+        "links": ["Internet protocols", "Data transmission"]
+    },
+    {
+        "title": "Fault tolerance",
+        "links": ["Reliability engineering", "Error recovery"]
+    },
+    {
+        "title": "Operating systems",
+        "links": ["System programming", "Kernel design"]
+    },
+    {
+        "title": "Virtual machines",
+        "links": ["System virtualization", "Emulation"]
+    }
+]
