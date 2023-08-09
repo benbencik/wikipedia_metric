@@ -46,18 +46,20 @@ namespace wikipedia_metric
                 Console.WriteLine("6. Cluster the graph");
                 Console.WriteLine("7. Exit the applicaiton");
                 Console.Write("Your choice: ");
-           
+
                 string input = Console.ReadLine().Trim();
 
                 if (int.TryParse(input, out int choice))
                 {
                     if (choice >= 1 && choice <= 7)
                     {
-                        if (graph == null && choice != 1 && choice != 7) {
+                        if (graph == null && choice != 1 && choice != 7)
+                        {
                             logger.Error("Please load the graph first!");
                             continue;
                         }
-                        else {
+                        else
+                        {
                             Actions action = (Actions)choice;
                             return action;
                         }
@@ -81,7 +83,8 @@ namespace wikipedia_metric
                 Console.WriteLine($"{i + 1}. {fileName}");
             }
 
-            while (true) {
+            while (true)
+            {
                 Console.Write("Please enter the path to the graph file: ");
                 string input = Console.ReadLine().Trim();
 
@@ -118,7 +121,8 @@ namespace wikipedia_metric
             }
         }
 
-        public void SearchForArticles() {
+        public void SearchForArticles()
+        {
             Console.WriteLine("Please enter search phrase: ");
             Console.WriteLine("...use ^ to search for articles starting with given phrase:");
             Console.WriteLine("...use $ to search for articles ending with given phrase:");
@@ -131,30 +135,51 @@ namespace wikipedia_metric
             }
         }
 
-        public void PrintGraphStats() {
+        public void PrintGraphStats()
+        {
             graph.PrintGraphStats();
         }
 
-        public void DeleteInvalidLinks() {
+        public void DeleteInvalidLinks()
+        {
             graph.DeleteInvalidLinks();
         }
 
-        public void SearchForPathBetweenTwoArticles() {
+        public List<Node> PreparePathForPainter(List<string> path)
+        {
+            List<Node> result = new();
+            foreach (string n in path) {
+                List<string> neighbors = new();
+                foreach (string neighbor in graph.GetNeighbors(n)){
+                    neighbors.Add(neighbor);
+                }
+                Node new_node = new Node(n, neighbors.Count, neighbors);
+                result.Add(new_node);
+            }
+            return result;
+        }
+
+        public void SearchForPathBetweenTwoArticles(bool painter = false)
+        {
             int algorithm = 0;
-            while (true) {
+            while (true)
+            {
                 Console.WriteLine("Pick search algoritmh:");
                 Console.WriteLine("1. Uninformed BFS");
                 Console.WriteLine("2. Informed BFS");
                 string input = Console.ReadLine().Trim();
-                if (input == "1") {
+                if (input == "1")
+                {
                     algorithm = 1;
                     break;
                 }
-                else if (input == "2"){
+                else if (input == "2")
+                {
                     algorithm = 2;
                     break;
                 }
-                else{
+                else
+                {
                     Console.WriteLine("You entered invalid option...");
                 }
             }
@@ -162,32 +187,37 @@ namespace wikipedia_metric
             int i = 0;
             string[] info = {"Enter a valid source vertex: ",
                              "Enter a valid target vertex: "};
-            string[] vertices = {"", ""};
-            
-            while (i < 2) {
+            string[] vertices = { "", "" };
+
+            while (i < 2)
+            {
                 Console.WriteLine(info[i]);
                 string input = Console.ReadLine().Trim();
-                if (graph.ContainsVertex(input)) {
+                if (graph.ContainsVertex(input))
+                {
                     vertices[i] = input;
-                    i ++;
+                    i++;
                 }
-                else {
+                else
+                {
                     logger.Error($"{input} is not contained in the graph");
                 }
             }
 
-            string[] columns = {"Node1", "Node2"};
+            string[] columns = { "Node1", "Node2" };
             List<string> path;
-            
-            if (algorithm == 1 ) {
+
+            if (algorithm == 1)
+            {
                 path = graph.NaiveFindPath(vertices[0], vertices[1]);
             }
-            else {
+            else
+            {
                 path = graph.InformedSearch(vertices[0], vertices[1]);
             }
-            
-            string[,] table = new string[path.Count-1, 2];
-            for (int j = 0; j < path.Count-1; j++)
+
+            string[,] table = new string[path.Count - 1, 2];
+            for (int j = 0; j < path.Count - 1; j++)
             {
                 table[j, 0] = path[j].ToString();
                 table[j, 1] = path[j + 1].ToString();
@@ -197,7 +227,8 @@ namespace wikipedia_metric
             // graph.SearchPath(vertices[0], vertices[1]);
         }
 
-        public void ClusterTheGraph() {
+        public void ClusterTheGraph()
+        {
             Console.Write("Please enter number of clusters: ");
             string input = Console.ReadLine().Trim();
             int numberOfClusters = int.Parse(input);
