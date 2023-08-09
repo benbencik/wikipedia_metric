@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -12,17 +10,17 @@ namespace wikipedia_metric
         public Dictionary<string, HashSet<string>> adjacencyList;
         public Dictionary<string, Cluster> cluster;
         public List<string> nodes;
-        
+
         readonly Logger logger = new("Graph");
         private readonly Dictionary<string, int> components = new();
         private int barCounter;
         private int connectedComponentsCount;
-        readonly private string[] prefixes = { 
+        readonly private string[] prefixes = {
             ":ru:", "../", "Author:", ":Category:", "w:",
             "Page:", "Wikipedia:", "File:", "Template:",
         };
         readonly private string[] suffixes = {
-            ".jpg", ".png", ".pdf", ".svg", ".ogg", 
+            ".jpg", ".png", ".pdf", ".svg", ".ogg",
             ".mp3", ".jpeg", ".gif"
         };
 
@@ -31,7 +29,7 @@ namespace wikipedia_metric
             adjacencyList = article_dictionary;
             nodes = new List<string>(adjacencyList.Keys);
             logger.Info($"Graph successfully loaded");
-            
+
             logger.Info($"Analzying component...");
             connectedComponentsCount = 0;
             CountConnectedComponents();
@@ -89,17 +87,20 @@ namespace wikipedia_metric
                     // itterate through trimming patterns
                     foreach (var pattern in prefixes)
                     {
-                        if (pattern.Length <= trimmed.Length) {
+                        if (pattern.Length <= trimmed.Length)
+                        {
                             bool patternFound = true;
-                            for (int i = 0; i < pattern.Length-1; i++)
+                            for (int i = 0; i < pattern.Length - 1; i++)
                             {
-                                if (trimmed[i] != pattern[i]) {
+                                if (trimmed[i] != pattern[i])
+                                {
                                     patternFound = false;
                                     break;
                                 }
                             }
                             // if pattern is found the substring not including the pattern
-                            if (patternFound) {
+                            if (patternFound)
+                            {
                                 trimmed = trimmed.Substring(pattern.Length, trimmed.Length - pattern.Length);
                             }
                         }
@@ -110,13 +111,16 @@ namespace wikipedia_metric
             }
         }
 
-        private void ClearNonExistenLinks()
+        public void DeleteInvalidLinks()
         {
             // clear jpg, png, pdf etc
             logger.Info("Clearing non existent links");
             int counter = 0;
             foreach (var item in adjacencyList)
             {
+                if (counter % 100 == 0) {
+                    logger.LoadingBar(nodes.Count, counter);
+                }
                 HashSet<String> new_links = new();
                 foreach (var link in item.Value)
                 {
@@ -179,9 +183,9 @@ namespace wikipedia_metric
             }
             double average = (double)sum / (double)adjacencyList.Count;
             string averageDeg = average.ToString("#.0000");
-            
-            string[] columns = {"#Nodes", "#Edges", "Average degree", "#Components"};
-            string[,] values = {{nodes.Count.ToString(), sum.ToString(), averageDeg, connectedComponentsCount.ToString()}};
+
+            string[] columns = { "#Nodes", "#Edges", "Average degree", "#Components" };
+            string[,] values = { { nodes.Count.ToString(), sum.ToString(), averageDeg, connectedComponentsCount.ToString() } };
             AsciiTablePrinter.PrintTable(columns, values);
         }
 
@@ -225,6 +229,8 @@ namespace wikipedia_metric
             string combinedRegexPattern = string.Join(".*", regexPatterns);
 
             var searchResults = nodes.Where(article => Regex.IsMatch(article, combinedRegexPattern));
+            // Sort the search results by length
+            searchResults = searchResults.OrderByDescending(article => article.Length);
             return searchResults;
         }
 
@@ -244,7 +250,8 @@ namespace wikipedia_metric
 
         public List<string> NaiveFindPath(string source, string target)
         {
-            if (components[source] != components[target]){
+            if (components[source] != components[target])
+            {
                 logger.Warning("Nodes are not in the same component...");
                 return new List<string>();
             }
@@ -254,7 +261,7 @@ namespace wikipedia_metric
             Queue<string> queue = new();
             queue.Enqueue(source);
             distances.Add(source, 0);
-            
+
             while (queue.Count > 0)
             {
                 string current = queue.Dequeue();
@@ -273,13 +280,53 @@ namespace wikipedia_metric
             return ReconstructPath(target, previous);
         }
 
-        public List<string> InformedSeach() {
-            // implementation of informed search algorithm
-            // uses heap to expand nodes with biggest degree
-            return new();
-            
+
+        public List<string> InformedSearch(string source, string target)
+        {
+            if (components[source] != components[target])
+            {
+                logger.Warning("Nodes are not in the same component...");
+                return new List<string>();
+            }
+
+            var priorityQueue = new SortedSet<(string, int)>(Comparer<(string, int)>.Create((x, y) => y.Item2.CompareTo(x.Item2)));
+            var previous = new Dictionary<string, string>();
+            var distances = new Dictionary<string, int>();
+
+            // Add the source node to the priority queue with its degree as the priority
+            priorityQueue.Add((source, -adjacencyList[source].Count));
+            distances.Add(source, 0);
+
+            while (priorityQueue.Count > 0)
+            {
+                var (currentNode, priority) = priorityQueue.First();
+                priorityQueue.Remove((currentNode, priority));
+
+                if (currentNode == target)
+                {
+                    // Target node found, reconstruct the path and return
+                    return ReconstructPath(target, previous);
+                }
+
+                if (distances.ContainsKey(currentNode))
+                {
+                    continue;
+                }
+
+                foreach (var neighbor in GetNeighbors(currentNode))
+                {
+                    int distance = distances[currentNode] + 1;
+
+                    if (!distances.ContainsKey(neighbor) || distance < distances[neighbor])
+                    {
+                        distances[neighbor] = distance;
+                        previous[neighbor] = currentNode;
+                        priorityQueue.Add((neighbor, -adjacencyList[neighbor].Count));
+                    }
+                }
+            }
+
+            return new List<string>(); // Path not found
         }
     }
-
-
 }

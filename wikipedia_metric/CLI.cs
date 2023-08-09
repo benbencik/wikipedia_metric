@@ -14,9 +14,10 @@ namespace wikipedia_metric
             LoadGraphFromFile = 1,
             SearchForArticles = 2,
             PrintGraphStats = 3,
-            FindPathBetweenTwoArticles = 4,
-            ClusterTheGraph = 5,
-            ExitTheApplication = 6
+            DeleteInvalidLinks = 4,
+            FindPathBetweenTwoArticles = 5,
+            ClusterTheGraph = 6,
+            ExitTheApplication = 7
         }
 
         public GraphSearchCLI()
@@ -40,18 +41,19 @@ namespace wikipedia_metric
                 Console.WriteLine("1. Load graph from file");
                 Console.WriteLine("2. Search for articles");
                 Console.WriteLine("3. Print graph stats");
-                Console.WriteLine("4. Find path between two articles");
-                Console.WriteLine("5. Cluster the graph");
-                Console.WriteLine("6. Exit the applicaiton");
+                Console.WriteLine("4. Delete non-existent links");
+                Console.WriteLine("5. Find path between two articles");
+                Console.WriteLine("6. Cluster the graph");
+                Console.WriteLine("7. Exit the applicaiton");
                 Console.Write("Your choice: ");
            
                 string input = Console.ReadLine().Trim();
 
                 if (int.TryParse(input, out int choice))
                 {
-                    if (choice >= 1 && choice <= 6)
+                    if (choice >= 1 && choice <= 7)
                     {
-                        if (graph == null && choice != 1 && choice != 6) {
+                        if (graph == null && choice != 1 && choice != 7) {
                             logger.Error("Please load the graph first!");
                             continue;
                         }
@@ -94,7 +96,6 @@ namespace wikipedia_metric
                             string selectedFile = files[fileNumber - 1];
                             Dictionary<string, HashSet<string>> map = JsonManager.FromFile(files[fileNumber - 1]);
                             graph = new Graph(map);
-                            Console.WriteLine($"Graph loaded from {selectedFile}");
                             break;
                         }
                         else
@@ -115,9 +116,6 @@ namespace wikipedia_metric
                     // Console.WriteLine($"Error: {ex.Message}");
                 }
             }
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Graph loaded successfully!");
-            Console.ResetColor();
         }
 
         public void SearchForArticles() {
@@ -137,7 +135,30 @@ namespace wikipedia_metric
             graph.PrintGraphStats();
         }
 
+        public void DeleteInvalidLinks() {
+            graph.DeleteInvalidLinks();
+        }
+
         public void SearchForPathBetweenTwoArticles() {
+            int algorithm = 0;
+            while (true) {
+                Console.WriteLine("Pick search algoritmh:");
+                Console.WriteLine("1. Uninformed BFS");
+                Console.WriteLine("2. Informed BFS");
+                string input = Console.ReadLine().Trim();
+                if (input == "1") {
+                    algorithm = 1;
+                    break;
+                }
+                else if (input == "2"){
+                    algorithm = 2;
+                    break;
+                }
+                else{
+                    Console.WriteLine("You entered invalid option...");
+                }
+            }
+
             int i = 0;
             string[] info = {"Enter a valid source vertex: ",
                              "Enter a valid target vertex: "};
@@ -151,16 +172,28 @@ namespace wikipedia_metric
                     i ++;
                 }
                 else {
-                    // Console.ForegroundColor = ConsoleColor.Red;
-                    // Console.WriteLine($"{input} is not contained in the graph");
-                    // Console.ResetColor();
+                    logger.Error($"{input} is not contained in the graph");
                 }
             }
 
-            List<string> path = graph.NaiveFindPath(vertices[0], vertices[1]);
-            foreach (string n in path) {
-                Console.Write($"{n}, "); 
+            string[] columns = {"Node1", "Node2"};
+            List<string> path;
+            
+            if (algorithm == 1 ) {
+                path = graph.NaiveFindPath(vertices[0], vertices[1]);
             }
+            else {
+                path = graph.InformedSearch(vertices[0], vertices[1]);
+            }
+            
+            string[,] table = new string[path.Count-1, 2];
+            for (int j = 0; j < path.Count-1; j++)
+            {
+                table[j, 0] = path[j].ToString();
+                table[j, 1] = path[j + 1].ToString();
+            }
+            Console.WriteLine("Path contains following edges:");
+            AsciiTablePrinter.PrintTable(columns, table);
             // graph.SearchPath(vertices[0], vertices[1]);
         }
 

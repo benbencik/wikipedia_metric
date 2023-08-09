@@ -30,6 +30,9 @@ namespace wikipedia_metric
                         case GraphSearchCLI.Actions.PrintGraphStats:
                             cli.PrintGraphStats();
                             break;
+                        case GraphSearchCLI.Actions.DeleteInvalidLinks:
+                            cli.DeleteInvalidLinks();
+                            break;
                         case GraphSearchCLI.Actions.FindPathBetweenTwoArticles:
                             cli.SearchForPathBetweenTwoArticles();
                             break;
@@ -49,7 +52,20 @@ namespace wikipedia_metric
             else {
                 Dictionary<string, HashSet<string>> map = JsonManager.FromFile("data/g_multiword_bigger.json");
                 var graph = new Graph(map);
+                Benchmark benchmark = new();
+                int iterations = 100;
 
+
+                void informed()
+                {
+                    graph.NaiveFindPath("Machine learning", "Network protocols");
+                }
+
+                benchmark.Measure(informed, iterations);
+                // Display the results
+                Console.WriteLine("Iterations: " + benchmark.Iterations);
+                Console.WriteLine("Total Elapsed Time: " + benchmark.TotalElapsedTime);
+                Console.WriteLine("Average Time: " + benchmark.AverageTime);
             }
 
         }        
