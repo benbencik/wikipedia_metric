@@ -24,24 +24,11 @@ namespace wikipedia_metric
             ClusterMembers.Add(member);
         }
 
-        int AverageNumberOfLinks() {
-            if (ClusterMembers.Count == 0) return 0;
-
-            int average = 0;
-            for (int i = 0; i < ClusterMembers.Count; i++) {
-                if (graph.adjacencyList.ContainsKey(ClusterMembers[i])){
-                    average += graph.adjacencyList[ClusterMembers[i]].Count;
-                }
-            }
-            return average / ClusterMembers.Count;
-        }
-
         public string[] GetStats(Dictionary<string, int> inDegree) {
             string[] stats = new string[4];
             stats[0] = ClusterCenter;
             stats[1] = ClusterMembers.Count.ToString();
             stats[2] = inDegree[ClusterCenter].ToString();
-            stats[3] = "nic zatial";
             return stats;
         } 
 
@@ -195,8 +182,8 @@ namespace wikipedia_metric
 
         private void PrintClusters()
         {
-            string[] columnNames = { "Cluster Center", "Number of Members", "Degree of Center", "Average Number of Links" };
-            string[,] table = new string[clusters.Count, 4];
+            string[] columnNames = { "Cluster Center", "Number of Members", "Degree of Center" };
+            string[,] table = new string[clusters.Count, 3];
             int counter = 0;
             foreach (Cluster cluster in clusters.Values)
             {
@@ -204,7 +191,6 @@ namespace wikipedia_metric
                 table[counter, 0] = stats[0];
                 table[counter, 1] = stats[1];
                 table[counter, 2] = stats[2];
-                table[counter, 3] = stats[3];
                 counter++;
             }
             AsciiTablePrinter.PrintTable(columnNames, table);    
