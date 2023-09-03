@@ -1,19 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace wikipedia_metric
 {
     public class Cluster
     {
-        readonly Graph graph;
         public string ClusterCenter { get; }
         public List<string> ClusterMembers { get; }
 
-        public Cluster(Graph graph, string center)
+        public Cluster(string center)
         {
             ClusterCenter = center;
             ClusterMembers = new List<string>();
@@ -24,21 +19,22 @@ namespace wikipedia_metric
             ClusterMembers.Add(member);
         }
 
-        public string[] GetStats(Dictionary<string, int> inDegree) {
+        public string[] GetStats(Dictionary<string, int> inDegree)
+        {
             string[] stats = new string[4];
             stats[0] = ClusterCenter;
             stats[1] = ClusterMembers.Count.ToString();
             stats[2] = inDegree[ClusterCenter].ToString();
             return stats;
-        } 
+        }
 
     }
- 
+
     public class ClusteringAlgorithms
     {
         readonly Graph graph;
         readonly Logger logger = new("ClusteringAlgorithms");
-        
+
         public Dictionary<string, int> inDegree = new();
         Dictionary<string, Cluster> clusters = new();
         public ClusteringAlgorithms(Graph graph)
@@ -52,7 +48,8 @@ namespace wikipedia_metric
             logger.Info("Clustering by degree");
             ClusterCenterByDegree(numberOfClusters);
 
-            if (printTable) {
+            if (printTable && clusters.Count > 0)
+            {
                 PrintClusters();
             }
         }
@@ -87,34 +84,6 @@ namespace wikipedia_metric
             }
         }
 
-                    
-        private List<string> HeapNPick(int n)
-        {
-            SortedSet<KeyValuePair<string, int>> minHeap = new SortedSet<KeyValuePair<string, int>>(
-                Comparer<KeyValuePair<string, int>>.Create((kvp1, kvp2) => kvp1.Value.CompareTo(kvp2.Value))
-            );
-
-            foreach (var kvp in inDegree)
-            {
-                if (minHeap.Count < n)
-                {
-                    minHeap.Add(kvp);
-                }
-                else if (kvp.Value > minHeap.Min.Value)
-                {
-                    minHeap.Remove(minHeap.Min);
-                    minHeap.Add(kvp);
-                }
-            }
-
-            List<string> topNKeys = new List<string>();
-            foreach (var kvp in minHeap)
-            {
-                topNKeys.Add(kvp.Key);
-            }
-
-            return topNKeys;
-        }
 
         private List<string> SortNPick(int n)
         {
@@ -135,15 +104,22 @@ namespace wikipedia_metric
             {
                 CalculateInDegrees();
             }
-            List<string> topNodes = HeapNPick(numberOfClusters);
-            // List<string> topNodes = SortNPick(numberOfClusters);
+
+            if (inDegree.Count < numberOfClusters)
+            {
+                logger.Warning($"Number of clusters is greater than number of nodes in the graph...");
+                return;
+            }
+
+            List<string> topNodes = SortNPick(numberOfClusters);
+            Console.WriteLine($"Picked {topNodes.Count} nodes as cluster centers");
 
             // ASSIGNING NODES TO CLUSTERS
             Queue<KeyValuePair<string, Cluster>> queue = new();
             HashSet<string> visited = new();
             foreach (string node in topNodes)
             {
-                Cluster newCluster = new(graph, node);
+                Cluster newCluster = new(node);
                 clusters[node] = newCluster;
                 visited.Add(node);
                 queue.Enqueue(new KeyValuePair<string, Cluster>(node, newCluster));
@@ -151,15 +127,18 @@ namespace wikipedia_metric
 
             int counter = 0;
             int missed = 0;
-            while (queue.Count > 0) {
-                if (counter < graph.nodes.Count) counter ++;
+            while (queue.Count > 0)
+            {
+                if (counter < graph.nodes.Count) counter++;
                 if (counter % 10_000 == 0 && progressBar)
                 {
                     logger.LoadingBar(graph.nodes.Count, counter);
                 }
 
                 KeyValuePair<string, Cluster> current = queue.Dequeue();
-                if (graph.adjacencyList.ContainsKey(current.Key)) {
+                visited.Add(current.Key);
+                if (graph.adjacencyList.ContainsKey(current.Key))
+                {
 
                     foreach (string neighbor in graph.adjacencyList[current.Key])
                     {
@@ -169,15 +148,17 @@ namespace wikipedia_metric
                             // graph.cluster[neighbor] = current.Value;
                             visited.Add(neighbor);
                             queue.Enqueue(new KeyValuePair<string, Cluster>(neighbor, current.Value));
-                            
+
                         }
                     }
                 }
-                else {
-                    missed ++;
-                    // logger.Warning($"Graph does not contain {current.Key}");
+                else
+                {
+                    missed++;
+                    logger.Warning($"Graph does not contain {current.Key}");
                 }
             }
+
         }
 
         private void PrintClusters()
@@ -193,27 +174,7 @@ namespace wikipedia_metric
                 table[counter, 2] = stats[2];
                 counter++;
             }
-            AsciiTablePrinter.PrintTable(columnNames, table);    
-        }
-
-        public double EvaluatePerformance()
-        {
-            // Calculate the sum of squared distances of nodes from their cluster centers
-            double sumSquaredDistances = 0;
-            foreach (var kvp in clusters)
-            {
-                string center = kvp.Key;
-                List<string> members = kvp.Value.ClusterMembers;
-
-                int centerDegree = GetInDegree(center) ?? 0;
-                foreach (string member in members)
-                {
-                    int memberDegree = GetInDegree(member) ?? 0;
-                    sumSquaredDistances += Math.Pow(memberDegree - centerDegree, 2);
-                }
-            }
-
-            return sumSquaredDistances;
+            AsciiTablePrinter.PrintTable(columnNames, table);
         }
     }
 }

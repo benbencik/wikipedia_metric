@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+
 
 namespace wikipedia_metric
 {
@@ -12,29 +14,17 @@ namespace wikipedia_metric
         public List<string> nodes;
 
         readonly Logger logger = new("Graph");
-        private readonly Dictionary<string, int> components = new();
-        private int barCounter;
-        private int connectedComponentsCount;
-        readonly private string[] prefixes = {
-            ":ru:", "../", "Author:", ":Category:", "w:",
-            "Page:", "Wikipedia:", "File:", "Template:",
-        };
-        readonly private string[] suffixes = {
-            ".jpg", ".png", ".pdf", ".svg", ".ogg",
-            ".mp3", ".jpeg", ".gif"
-        };
+
+        readonly private string[] prefixes = { "Wikipédia:" };
 
         public Graph(Dictionary<string, HashSet<string>> article_dictionary)
         {
             adjacencyList = article_dictionary;
-            nodes = new List<string>(adjacencyList.Keys);
             logger.Info($"Graph successfully loaded");
 
-            logger.Info($"Analzying component...");
-            connectedComponentsCount = 0;
-            CountConnectedComponents();
-            // TrimInvalidLinks();
-            // ClearNonExistenLinks();
+            FilterData();
+            DeleteInvalidLinks();
+            nodes = new List<string>(adjacencyList.Keys);
         }
 
         public void AddVertex(string vertex)
@@ -73,54 +63,69 @@ namespace wikipedia_metric
             return adjacencyList.ContainsKey(vertex);
         }
 
-
-        private void TrimInvalidLinks()
+        private void FilterData()
         {
-            // itterate through all pages
-            foreach (var links in adjacencyList)
+            logger.Info("Filtering data...");
+            int n = adjacencyList.Count;
+            int counter = 0;
+            foreach (var article in adjacencyList)
             {
-                HashSet<string> new_links = new HashSet<string>();
-                // itterate through all links in page
-                foreach (var item in links.Value)
+                if (counter % 10 == 0)
                 {
-                    string trimmed = item;
-                    // itterate through trimming patterns
-                    foreach (var pattern in prefixes)
+                    logger.LoadingBar(n, counter);
+                }
+                counter++;
+
+                // remove aricles without links
+                if (article.Value.Count == 0)
+                {
+                    adjacencyList.Remove(article.Key);
+                }
+                else
+                {
+                    // remove articles with invalid prefixes
+                    bool deleted = false;
+                    foreach (string prefix in prefixes)
                     {
-                        if (pattern.Length <= trimmed.Length)
+                        if (article.Key.StartsWith(prefix))
                         {
-                            bool patternFound = true;
-                            for (int i = 0; i < pattern.Length - 1; i++)
+                            adjacencyList.Remove(article.Key);
+                            deleted = true;
+                            break;
+                        }
+                    }
+                    if (deleted) continue;
+
+                    // remove articles with non-exitent links and invalid prefixes from links
+                    foreach (var link in article.Value)
+                    {
+                        foreach (string prefix in prefixes)
+                        {
+                            if (link.StartsWith(prefix))
                             {
-                                if (trimmed[i] != pattern[i])
-                                {
-                                    patternFound = false;
-                                    break;
-                                }
-                            }
-                            // if pattern is found the substring not including the pattern
-                            if (patternFound)
-                            {
-                                trimmed = trimmed.Substring(pattern.Length, trimmed.Length - pattern.Length);
+                                adjacencyList[article.Key].Remove(link);
                             }
                         }
                     }
-                    new_links.Add(trimmed);
                 }
-                adjacencyList[links.Key] = new_links;
             }
         }
+
 
         public void DeleteInvalidLinks()
         {
             // clear jpg, png, pdf etc
             logger.Info("Clearing non existent links");
             int counter = 0;
+            int counter_bar = 0;
             foreach (var item in adjacencyList)
             {
-                if (counter % 100 == 0) {
-                    logger.LoadingBar(nodes.Count, counter);
+                if (counter_bar % 100 == 0)
+                {
+                    logger.LoadingBar(adjacencyList.Count, counter_bar);
                 }
+                counter_bar++;
+
                 HashSet<String> new_links = new();
                 foreach (var link in item.Value)
                 {
@@ -138,42 +143,6 @@ namespace wikipedia_metric
             logger.Info($"Removed {counter} non existent links");
         }
 
-        public int CountConnectedComponents()
-        {
-            if (nodes.Count == 0) return 0; // If there are no nodes, there are no connected components.
-            barCounter = 0;
-            foreach (string node in nodes)
-            {
-                if (!components.ContainsKey(node))
-                {
-                    connectedComponentsCount++;
-                    DFS(node);
-                }
-            }
-
-            return connectedComponentsCount;
-        }
-
-        private void DFS(string currentNode)
-        {
-            if (components.ContainsKey(currentNode)) return;
-
-            components[currentNode] = connectedComponentsCount;
-            barCounter++;
-            if (barCounter % 100 == 0)
-            {
-                logger.LoadingBar(nodes.Count, barCounter);
-            }
-            foreach (var neighbor in GetNeighbors(currentNode))
-            {
-                if (ContainsVertex(neighbor))
-                {
-                    DFS(neighbor);
-                }
-            }
-        }
-
-
         public void PrintGraphStats()
         {
             int sum = 0;
@@ -184,8 +153,8 @@ namespace wikipedia_metric
             double average = (double)sum / (double)adjacencyList.Count;
             string averageDeg = average.ToString("#.0000");
 
-            string[] columns = { "#Nodes", "#Edges", "Average degree", "#Components" };
-            string[,] values = { { nodes.Count.ToString(), sum.ToString(), averageDeg, connectedComponentsCount.ToString() } };
+            string[] columns = { "#Nodes", "#Edges", "Average degree" };
+            string[,] values = { { adjacencyList.Count.ToString(), sum.ToString(), averageDeg } };
             AsciiTablePrinter.PrintTable(columns, values);
         }
 
@@ -250,11 +219,6 @@ namespace wikipedia_metric
 
         public List<string> NaiveFindPath(string source, string target)
         {
-            if (components[source] != components[target])
-            {
-                logger.Warning("Nodes are not in the same component...");
-                return new List<string>();
-            }
             // implementation of uninformed search algorithm
             Dictionary<string, int> distances = new();
             Dictionary<string, string> previous = new();
@@ -280,53 +244,40 @@ namespace wikipedia_metric
             return ReconstructPath(target, previous);
         }
 
-
-        public List<string> InformedSearch(string source, string target)
+        public List<string> PriorityFindPath(string source, string target)
         {
-            if (components[source] != components[target])
-            {
-                logger.Warning("Nodes are not in the same component...");
-                return new List<string>();
-            }
+            // Initialize a priority queue based on node degrees
+            PriorityQueue<string, int> priorityQueue = new PriorityQueue<string, int>();
 
-            var priorityQueue = new SortedSet<(string, int)>(Comparer<(string, int)>.Create((x, y) => y.Item2.CompareTo(x.Item2)));
-            var previous = new Dictionary<string, string>();
-            var distances = new Dictionary<string, int>();
+            // Initialize dictionaries for distances and previous nodes
+            Dictionary<string, int> distances = new();
+            Dictionary<string, string> previous = new();
 
-            // Add the source node to the priority queue with its degree as the priority
-            priorityQueue.Add((source, -adjacencyList[source].Count));
+            // Add the source node with a degree of 0
+            priorityQueue.Enqueue(source, GetNeighbors(source).Count);
             distances.Add(source, 0);
 
             while (priorityQueue.Count > 0)
             {
-                var (currentNode, priority) = priorityQueue.First();
-                priorityQueue.Remove((currentNode, priority));
-
-                if (currentNode == target)
-                {
-                    // Target node found, reconstruct the path and return
-                    return ReconstructPath(target, previous);
-                }
-
-                if (distances.ContainsKey(currentNode))
-                {
-                    continue;
-                }
+                var currentNode = priorityQueue.Dequeue();
+                if (currentNode == target) { break; }
 
                 foreach (var neighbor in GetNeighbors(currentNode))
                 {
-                    int distance = distances[currentNode] + 1;
-
-                    if (!distances.ContainsKey(neighbor) || distance < distances[neighbor])
+                    int newDegree = GetNeighbors(neighbor).Count;
+                    if (!distances.ContainsKey(neighbor))
                     {
-                        distances[neighbor] = distance;
-                        previous[neighbor] = currentNode;
-                        priorityQueue.Add((neighbor, -adjacencyList[neighbor].Count));
+                        distances.Add(neighbor, distances[currentNode] + 1);
+                        previous.Add(neighbor, currentNode);
+                        priorityQueue.Enqueue(neighbor, newDegree);
                     }
                 }
             }
 
-            return new List<string>(); // Path not found
+            return ReconstructPath(target, previous);
         }
+
     }
+
 }
+

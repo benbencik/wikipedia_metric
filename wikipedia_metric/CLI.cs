@@ -14,10 +14,9 @@ namespace wikipedia_metric
             LoadGraphFromFile = 1,
             SearchForArticles = 2,
             PrintGraphStats = 3,
-            DeleteInvalidLinks = 4,
-            FindPathBetweenTwoArticles = 5,
-            ClusterTheGraph = 6,
-            ExitTheApplication = 7
+            FindPathBetweenTwoArticles = 4,
+            ClusterTheGraph = 5,
+            ExitTheApplication = 6
         }
 
         public GraphSearchCLI()
@@ -41,19 +40,18 @@ namespace wikipedia_metric
                 Console.WriteLine("1. Load graph from file");
                 Console.WriteLine("2. Search for articles");
                 Console.WriteLine("3. Print graph stats");
-                Console.WriteLine("4. Delete non-existent links");
-                Console.WriteLine("5. Find path between two articles");
-                Console.WriteLine("6. Cluster the graph");
-                Console.WriteLine("7. Exit the applicaiton");
+                Console.WriteLine("4. Find path between two articles");
+                Console.WriteLine("5. Cluster the graph");
+                Console.WriteLine("6. Exit the applicaiton");
                 Console.Write("Your choice: ");
 
                 string input = Console.ReadLine().Trim();
 
                 if (int.TryParse(input, out int choice))
                 {
-                    if (choice >= 1 && choice <= 7)
+                    if (choice >= 1 && choice <= 6)
                     {
-                        if (graph == null && choice != 1 && choice != 7)
+                        if (graph == null && choice != 1 && choice != 6)
                         {
                             logger.Error("Please load the graph first!");
                             continue;
@@ -114,9 +112,9 @@ namespace wikipedia_metric
                         break;
                     }
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    // Console.WriteLine($"Error: {ex.Message}");
+                    logger.Error($"Error: {ex}");
                 }
             }
         }
@@ -140,17 +138,15 @@ namespace wikipedia_metric
             graph.PrintGraphStats();
         }
 
-        public void DeleteInvalidLinks()
-        {
-            graph.DeleteInvalidLinks();
-        }
 
         public List<Node> PreparePathForPainter(List<string> path)
         {
             List<Node> result = new();
-            foreach (string n in path) {
+            foreach (string n in path)
+            {
                 List<string> neighbors = new();
-                foreach (string neighbor in graph.GetNeighbors(n)){
+                foreach (string neighbor in graph.GetNeighbors(n))
+                {
                     neighbors.Add(neighbor);
                 }
                 Node new_node = new Node(n, neighbors.Count, neighbors);
@@ -166,7 +162,7 @@ namespace wikipedia_metric
             {
                 Console.WriteLine("Pick search algoritmh:");
                 Console.WriteLine("1. Uninformed BFS");
-                Console.WriteLine("2. Informed BFS");
+                Console.WriteLine("2. Expand highest degree BFS");
                 string input = Console.ReadLine().Trim();
                 if (input == "1")
                 {
@@ -175,7 +171,7 @@ namespace wikipedia_metric
                 }
                 else if (input == "2")
                 {
-                    algorithm = 2;
+                    algorithm = 1;
                     break;
                 }
                 else
@@ -205,26 +201,34 @@ namespace wikipedia_metric
             }
 
             string[] columns = { "Node1", "Node2" };
-            List<string> path;
+            List<string> path = new();
 
             if (algorithm == 1)
             {
                 path = graph.NaiveFindPath(vertices[0], vertices[1]);
             }
-            else
+            else if (algorithm == 2)
             {
-                path = graph.InformedSearch(vertices[0], vertices[1]);
+                path = graph.PriorityFindPath(vertices[0], vertices[1]);
             }
 
-            string[,] table = new string[path.Count - 1, 2];
-            for (int j = 0; j < path.Count - 1; j++)
+            if (path.Count == 0)
             {
-                table[j, 0] = path[j].ToString();
-                table[j, 1] = path[j + 1].ToString();
+                logger.Error("Path not found!");
+                return;
             }
-            Console.WriteLine("Path contains following edges:");
-            AsciiTablePrinter.PrintTable(columns, table);
-            // graph.SearchPath(vertices[0], vertices[1]);
+            else
+            {
+                string[,] table = new string[path.Count - 1, 2];
+                for (int j = 0; j < path.Count - 1; j++)
+                {
+                    table[j, 0] = path[j].ToString();
+                    table[j, 1] = path[j + 1].ToString();
+                }
+                Console.WriteLine("Path contains following edges:");
+                AsciiTablePrinter.PrintTable(columns, table);
+                // graph.SearchPath(vertices[0], vertices[1]);
+            }
         }
 
         public void ClusterTheGraph()

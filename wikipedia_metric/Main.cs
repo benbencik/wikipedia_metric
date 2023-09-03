@@ -10,12 +10,12 @@ namespace wikipedia_metric
         {
 
             bool interactive = true;
-            // bool verbose = false;
-            // bool benchmark = false;
-            
-            if (interactive) {
+
+            if (interactive)
+            {
                 GraphSearchCLI cli = new();
-                while (true) {
+                while (true)
+                {
                     var action = cli.GetAction();
                     switch (action)
                     {
@@ -29,9 +29,6 @@ namespace wikipedia_metric
                             break;
                         case GraphSearchCLI.Actions.PrintGraphStats:
                             cli.PrintGraphStats();
-                            break;
-                        case GraphSearchCLI.Actions.DeleteInvalidLinks:
-                            cli.DeleteInvalidLinks();
                             break;
                         case GraphSearchCLI.Actions.FindPathBetweenTwoArticles:
                             cli.SearchForPathBetweenTwoArticles();
@@ -49,25 +46,50 @@ namespace wikipedia_metric
                 }
 
             }
-            else {
-                Dictionary<string, HashSet<string>> map = JsonManager.FromFile("data/g_multiword_bigger.json");
+            else
+            {
+                Dictionary<string, HashSet<string>> map = JsonManager.FromFile("data/sk.json");
                 var graph = new Graph(map);
+
                 Benchmark benchmark = new();
-                int iterations = 100;
+                int iterations = 5;
 
 
-                void informed()
+                void naive()
                 {
-                    graph.NaiveFindPath("Machine learning", "Network protocols");
+                    graph.NaiveFindPath("Univerzita Karlova", "Betón");
+                    graph.NaiveFindPath("Havaj", "ChatGPT");
+                    graph.NaiveFindPath("Malá Fatra", "Napoleón");
+                    graph.NaiveFindPath("Bruce Dickinson", "Zuzana Čaputová");
+                    graph.NaiveFindPath("Mačka", "Jozef II.");
                 }
 
-                benchmark.Measure(informed, iterations);
+                void naive_priority()
+                {
+                    graph.PriorityFindPath("Univerzita Karlova", "Betón");
+                    graph.PriorityFindPath("Havaj", "ChatGPT");
+                    graph.PriorityFindPath("Malá Fatra", "Napoleón");
+                    graph.PriorityFindPath("Bruce Dickinson", "Zuzana Čaputová");
+                    graph.PriorityFindPath("Mačka", "Jozef II.");
+
+                }
+
+                benchmark.Measure(naive, iterations);
                 // Display the results
+                Console.WriteLine("Naive BFS --------------------------");
+                Console.WriteLine("Iterations: " + benchmark.Iterations);
+                Console.WriteLine("Total Elapsed Time: " + benchmark.TotalElapsedTime);
+                Console.WriteLine("Average Time: " + benchmark.AverageTime + "\n");
+
+                benchmark.Measure(naive_priority, iterations);
+                // Display the results
+                Console.WriteLine("\nNaive priority by degree BFS-------");
                 Console.WriteLine("Iterations: " + benchmark.Iterations);
                 Console.WriteLine("Total Elapsed Time: " + benchmark.TotalElapsedTime);
                 Console.WriteLine("Average Time: " + benchmark.AverageTime);
+
             }
 
-        }        
+        }
     }
 }

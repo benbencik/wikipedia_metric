@@ -6,6 +6,7 @@ namespace wikipedia_metric
 {
     public class Benchmark
     {
+        Logger logger = new("Benchmark");
         private readonly List<TimeSpan> executionTimes; // Stores the execution times for each iteration
         private readonly Stopwatch stopwatch; // Measures elapsed time
 
@@ -27,6 +28,7 @@ namespace wikipedia_metric
 
             for (int i = 0; i < iterations; i++)
             {
+                logger.LoadingBar(iterations, i + 1);
                 stopwatch.Restart();
                 action.Invoke();
                 stopwatch.Stop();

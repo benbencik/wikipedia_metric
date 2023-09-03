@@ -2,5 +2,5 @@
 .idea
 **bin/
 **obj/
-**data
-wikipedia_metric/large-wiki.json
+wikipedia_metric/data/a_large-wiki.json
+wikipedia_metric/data/sk.json
