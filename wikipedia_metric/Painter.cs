@@ -8,7 +8,7 @@ namespace wikipedia_metric
     public class Node : IComparable<Node>
     {
         public readonly string Name;
-        public readonly List<string> Neighbours;
+        public List<string> Neighbours;
 
         public (double X, double Y) Coords;
         public double Radius;
@@ -287,7 +287,7 @@ namespace wikipedia_metric
                     (float)(node.Coords.Y - node.Radius), (float)node.Radius * 2, (float)node.Radius * 2);
 
                 // Draw the node on the image
-                graphics.DrawString(node.Name, new Font("Calibri", 10), Brushes.Black, new RectangleF(rect.X + rect.Width / 3, rect.Y + rect.Height / 3, rect.Width / 2, rect.Height / 2));
+                graphics.DrawString(node.Name, new Font("Calibri", 10), Brushes.Black, new RectangleF(rect.X + rect.Width / 3.5f, rect.Y + rect.Height / 3.5f, rect.Width / 2, rect.Height / 2));
                 graphics.DrawEllipse(brush, rect);
             }
 

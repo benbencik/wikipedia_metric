@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.VisualBasic;
 
 namespace wikipedia_metric
 {
@@ -148,9 +149,18 @@ namespace wikipedia_metric
                 foreach (string neighbor in graph.GetNeighbors(n))
                 {
                     neighbors.Add(neighbor);
+                    if (result.Find(x => x.Name == neighbor) == null)
+                        result.Add(new Node(neighbor, 0, new List<string>()));
                 }
                 Node new_node = new Node(n, neighbors.Count, neighbors);
-                result.Add(new_node);
+                var existing_node = result.Find(x => x.Name == n);
+                if (existing_node == null)
+                    result.Add(new_node);
+                else
+                {
+                    existing_node.Neighbours = neighbors;
+                    existing_node.Radius = neighbors.Count;
+                }
             }
             return result;
         }
