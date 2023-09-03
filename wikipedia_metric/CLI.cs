@@ -21,12 +21,12 @@ namespace wikipedia_metric
 
         public GraphSearchCLI()
         {
-            string asciiArt = @"                                                        
- __      __  _   _     _                   _   _            __  __         _           _      
- \ \    / / (_) | |__ (_)  _ __   ___   __| | (_)  __ _    |  \/  |  ___  | |_   _ _  (_)  __ 
+            string asciiArt = @"
+ __      __  _   _     _                   _   _            __  __         _           _
+ \ \    / / (_) | |__ (_)  _ __   ___   __| | (_)  __ _    |  \/  |  ___  | |_   _ _  (_)  __
   \ \/\/ /  | | | / / | | | '_ \ / -_) / _` | | | / _` |   | |\/| | / -_) |  _| | '_| | | / _|
    \_/\_/   |_| |_\_\ |_| | .__/ \___| \__,_| |_| \__,_|   |_|  |_| \___|  \__| |_|   |_| \__|
-                          |_|                                                                 
+                          |_|
             ";
             Console.WriteLine(asciiArt);
             Console.WriteLine("Welcome to the Wikipedia Graph Search Application!");
@@ -105,7 +105,7 @@ namespace wikipedia_metric
                             // Console.WriteLine("Invalid file number.");
                         }
                     }
-                    else  // Load by path 
+                    else  // Load by path
                     {
                         Dictionary<string, HashSet<string>> map = JsonManager.FromFile(input);
                         graph = new Graph(map);
@@ -219,6 +219,12 @@ namespace wikipedia_metric
             }
             else
             {
+                foreach (string s in path)
+                {
+                    Console.Write(", " + s);
+                }
+                Console.WriteLine();
+
                 string[,] table = new string[path.Count - 1, 2];
                 for (int j = 0; j < path.Count - 1; j++)
                 {
@@ -227,12 +233,12 @@ namespace wikipedia_metric
                 }
                 Console.WriteLine("Path contains following edges:");
                 AsciiTablePrinter.PrintTable(columns, table);
-                
+
                 if (painter)
                 {
                     List<Node> nodes = PreparePathForPainter(path);
-                    Painter graphPainter = new Painter(1000, 20, 10);
-                    graphPainter.PaintToImage(nodes, "img");
+                    Painter graphPainter = new Painter(1000, 20, 60);
+                    graphPainter.PaintToImage(nodes, "img.png");
                 }
             }
         }

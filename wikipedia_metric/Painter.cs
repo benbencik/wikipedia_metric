@@ -162,6 +162,8 @@ namespace wikipedia_metric
             foreach (var neighNodeName in node.Neighbours)
             {
                 var neighNode = AllNodes.Find(x => x.Name == neighNodeName);
+                if (neighNode == null)
+                    continue;
 
                 List<Node> progress = null;
                 // Check if we can still select some coordinates or if we selected too many times
@@ -285,7 +287,7 @@ namespace wikipedia_metric
                     (float)(node.Coords.Y - node.Radius), (float)node.Radius * 2, (float)node.Radius * 2);
 
                 // Draw the node on the image
-                graphics.DrawString(node.Name, new Font("Calibri", 5), Brushes.Black, rect);
+                graphics.DrawString(node.Name, new Font("Calibri", 10), Brushes.Black, new RectangleF(rect.X + rect.Width / 3, rect.Y + rect.Height / 3, rect.Width / 2, rect.Height / 2));
                 graphics.DrawEllipse(brush, rect);
             }
 
