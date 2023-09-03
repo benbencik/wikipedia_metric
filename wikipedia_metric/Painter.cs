@@ -161,6 +161,10 @@ namespace wikipedia_metric
 
             foreach (var neighNodeName in node.Neighbours)
             {
+                // check if neigh node is already selected to draw
+                if (SelectedToDraw.Any(x => x.Name == neighNodeName))
+                    continue;
+
                 var neighNode = AllNodes.Find(x => x.Name == neighNodeName);
                 if (neighNode == null)
                     continue;

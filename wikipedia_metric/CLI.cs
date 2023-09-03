@@ -149,18 +149,24 @@ namespace wikipedia_metric
                 foreach (string neighbor in graph.GetNeighbors(n))
                 {
                     neighbors.Add(neighbor);
-                    if (result.Find(x => x.Name == neighbor) == null)
-                        result.Add(new Node(neighbor, 0, new List<string>()));
+                    // if (result.Find(x => x.Name == neighbor) == null)
+                    //     result.Add(new Node(neighbor, 0, new List<string>()));
                 }
-                Node new_node = new Node(n, neighbors.Count, neighbors);
-                var existing_node = result.Find(x => x.Name == n);
-                if (existing_node == null)
-                    result.Add(new_node);
+                int size;
+                int sizeLimit = 20;
+                if (neighbors.Count > sizeLimit)
+                    size = (int)Math.Pow(neighbors.Count, -3);
                 else
-                {
-                    existing_node.Neighbours = neighbors;
-                    existing_node.Radius = neighbors.Count;
-                }
+                    size = neighbors.Count;
+                Node new_node = new(n, sizeLimit + size, neighbors);
+                // var existing_node = result.Find(x => x.Name == n);
+                // if (existing_node == null)
+                result.Add(new_node);
+                // else
+                // {
+                //     existing_node.Neighbours = neighbors;
+                //     existing_node.Radius = neighbors.Count;
+                // }
             }
             return result;
         }
@@ -247,8 +253,20 @@ namespace wikipedia_metric
                 if (painter)
                 {
                     List<Node> nodes = PreparePathForPainter(path);
-                    Painter graphPainter = new Painter(1000, 20, 60);
-                    graphPainter.PaintToImage(nodes, "img.png");
+                    List<Node> final_nodes = new();
+                    Painter graphPainter = new Painter(1500, 20, 10);
+                    foreach (Node n in nodes)
+                    {
+                        List<string> final_neighbors = new();
+                        foreach (var neigh in n.Neighbours)
+                            if (nodes.Find(x => x.Name == neigh) != null)
+                                final_neighbors.Add(neigh);
+
+                        n.Neighbours = final_neighbors;
+                        final_nodes.Add(n);
+
+                    }
+                    graphPainter.PaintToImage(final_nodes, "img.png");
                 }
             }
         }
