@@ -155,7 +155,7 @@ namespace wikipedia_metric
             return result;
         }
 
-        public void SearchForPathBetweenTwoArticles(bool painter = false)
+        public void SearchForPathBetweenTwoArticles(bool painter = true)
         {
             int algorithm = 0;
             while (true)
@@ -227,7 +227,13 @@ namespace wikipedia_metric
                 }
                 Console.WriteLine("Path contains following edges:");
                 AsciiTablePrinter.PrintTable(columns, table);
-                // graph.SearchPath(vertices[0], vertices[1]);
+                
+                if (painter)
+                {
+                    List<Node> nodes = PreparePathForPainter(path);
+                    Painter graphPainter = new Painter(1000, 20, 10);
+                    graphPainter.PaintToImage(nodes, "img");
+                }
             }
         }
 
